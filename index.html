@@ -576,6 +576,9 @@
     <div class="tab-item" data-tab="channel" onclick="switchTab('channel')">
       <span class="tab-icon">🎯</span>场域分析
     </div>
+    <div class="tab-item" data-tab="violation" onclick="switchTab('violation')">
+      <span class="tab-icon">⚠️</span>违规预警
+    </div>
     <div class="tab-item" data-tab="goods" onclick="switchTab('goods')">
       <span class="tab-icon">📦</span>货盘洞察
     </div>
@@ -1124,7 +1127,130 @@
 </div>
 
 <!-- ═══════════════════════════════════════════
-     PAGE 5：货盘洞察
+     PAGE 5：违规预警
+═══════════════════════════════════════════ -->
+<div class="page" id="page-violation">
+
+  <div class="section-title">
+    <span class="s-icon">⚠️</span>昨日违规预警汇总
+    <span class="s-badge">4/21</span>
+  </div>
+
+  <!-- 违规概览 -->
+  <div class="card">
+    <div class="card-title">
+      <span class="ct-dot" style="background:var(--orange)"></span>
+      昨日违规概览（有效标签）
+    </div>
+    <div class="stat-row cols3">
+      <div class="stat-item" style="background:#fff0f2;">
+        <div class="stat-label">📝 笔记违规</div>
+        <div class="stat-value"><span style="color:var(--red)">192</span></div>
+        <div style="font-size:11px; color:var(--text-sub); margin-top:4px;">涉及 75 家商家</div>
+      </div>
+      <div class="stat-item" style="background:#fffbeb;">
+        <div class="stat-label">📦 商品违规</div>
+        <div class="stat-value"><span style="color:var(--orange)">3</span></div>
+        <div style="font-size:11px; color:var(--text-sub); margin-top:4px;">涉及 2 家商家</div>
+      </div>
+      <div class="stat-item" style="background:#eff6ff;">
+        <div class="stat-label">🎙️ 直播违规</div>
+        <div class="stat-value"><span style="color:var(--blue)">1</span></div>
+        <div style="font-size:11px; color:var(--text-sub); margin-top:4px;">涉及 1 家商家</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 笔记违规 Top 商家 -->
+  <div class="section-title">
+    <span class="s-icon">📝</span>笔记违规 Top 商家
+  </div>
+
+  <div class="card">
+    <div class="alert-strip warn">
+      <span class="alert-icon">⚠️</span>
+      <span class="alert-text">以下商家昨日有<strong>较多笔记违规罚单</strong>，建议优先联系提醒。主要违规类型：工业化流水号（批量相似笔记）、疑似导流、违规营销。</span>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr><th>商家</th><th>主要违规原因</th><th style="text-align:right;">罚单数</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><div class="td-name">嬛嬛的低卡轻食日记的店</div></td><td><span class="pill pill-n">工业化流水号</span></td><td style="text-align:right; font-weight:700; color:var(--red);">13</td></tr>
+          <tr><td><div class="td-name">Happylogist快乐哲学旗舰店</div></td><td><span class="pill pill-n">工业化流水号</span></td><td style="text-align:right; font-weight:700; color:var(--red);">10</td></tr>
+          <tr><td><div class="td-name">旺旺碎冰冰旗舰店</div></td><td><span class="pill pill-n">自相似笔记</span></td><td style="text-align:right; font-weight:700; color:var(--red);">7</td></tr>
+          <tr><td><div class="td-name">臻江味臻选零食的店</div></td><td><span class="pill pill-n">工业化流水号</span></td><td style="text-align:right; font-weight:700; color:var(--red);">9</td></tr>
+          <tr><td><div class="td-name">金薄薄巧克力旗舰店</div></td><td><span class="pill pill-c">疑似导流+重复违规</span></td><td style="text-align:right; font-weight:700; color:var(--red);">6</td></tr>
+          <tr><td><div class="td-name">小禾家零食分装的店</div></td><td><span class="pill pill-c">违规营销·价格异常</span></td><td style="text-align:right; font-weight:700; color:var(--orange);">5</td></tr>
+          <tr><td><div class="td-name">福满零食铺的店</div></td><td><span class="pill pill-n">工业化流水号</span></td><td style="text-align:right; font-weight:700; color:var(--orange);">5</td></tr>
+          <tr><td><div class="td-name">疯狂大榴莲的店</div></td><td><span class="pill pill-n">工业化+商品不相关</span></td><td style="text-align:right; font-weight:700; color:var(--orange);">7</td></tr>
+          <tr><td><div class="td-name">谨星扁鹊旗舰店</div></td><td><span class="pill pill-c">医疗高危+风险发布</span></td><td style="text-align:right; font-weight:700; color:var(--orange);">5</td></tr>
+          <tr><td><div class="td-name">paldo食品旗舰店</div></td><td><span class="pill pill-n">工业化流水号+导流</span></td><td style="text-align:right; font-weight:700; color:var(--orange);">8</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="data-source-note">数据来源：违规中心处罚明细 · 2026-04-21 · 有效标签筛选</div>
+  </div>
+
+  <!-- 特别关注 -->
+  <div class="section-title">
+    <span class="s-icon">🚨</span>特别关注
+  </div>
+
+  <div class="card">
+    <div class="anomaly-list">
+      <div class="anomaly-item" style="background:#fff0f2;">
+        <div class="icon-circle" style="background:#ffcdd5; font-size:16px;">🏥</div>
+        <div class="anomaly-main">
+          <div class="anomaly-name">谨星扁鹊旗舰店</div>
+          <div class="anomaly-meta">医疗高危风险回扫 × 2 + 风险发布 × 2 + 身体暴露 × 2 + 封标跟风 × 1</div>
+        </div>
+        <div class="anomaly-right">
+          <div class="anomaly-delta up">5 条</div>
+          <div class="anomaly-pct up">医疗类违规</div>
+        </div>
+      </div>
+      <div class="anomaly-item" style="background:#fff8ee;">
+        <div class="icon-circle" style="background:#fde68a; font-size:16px;">📢</div>
+        <div class="anomaly-main">
+          <div class="anomaly-name">德叔鲍鱼旗舰店</div>
+          <div class="anomaly-meta">医疗高危风险回扫 × 2</div>
+        </div>
+        <div class="anomaly-right">
+          <div class="anomaly-delta up">2 条</div>
+          <div class="anomaly-pct up">医疗类违规</div>
+        </div>
+      </div>
+      <div class="anomaly-item" style="background:#fff8ee;">
+        <div class="icon-circle" style="background:#fde68a; font-size:16px;">🏪</div>
+        <div class="anomaly-main">
+          <div class="anomaly-name">上海双囍馄饨（20:30直播）的店</div>
+          <div class="anomaly-meta">直播间生态-不真诚直播-工业化直播 × 1</div>
+        </div>
+        <div class="anomaly-right">
+          <div class="anomaly-delta" style="color:var(--blue);">直播违规</div>
+          <div class="anomaly-pct" style="color:var(--blue);">需关注</div>
+        </div>
+      </div>
+      <div class="anomaly-item" style="background:#fff8ee;">
+        <div class="icon-circle" style="background:#fde68a; font-size:16px;">💰</div>
+        <div class="anomaly-main">
+          <div class="anomaly-name">民和旗舰店</div>
+          <div class="anomaly-meta">商品价格信息异常 × 2（商品违规）</div>
+        </div>
+        <div class="anomaly-right">
+          <div class="anomaly-delta" style="color:var(--orange);">商品违规</div>
+          <div class="anomaly-pct" style="color:var(--orange);">需处理</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 6：货盘洞察
 ═══════════════════════════════════════════ -->
 <div class="page" id="page-goods">
 
@@ -1875,6 +2001,86 @@ function drawTrendPlaceholder() {
     span.textContent = `${d.getMonth()+1}/${d.getDate()}`;
     lbl.appendChild(span);
   });
+}
+
+// ── Seed today's data (2026-04-22) ──
+function seedTodayData() {
+  // 今日实时（单位：万元）
+  const nums = {
+    'today-dgmv': 127.2,
+    'yd-dgmv':    146.7,
+    'lw-dgmv':    0,      // 待补充
+    'mtd-dgmv':   0,      // 待补充
+    'today-dab':  0,
+    'yd-dab':     0,
+    'today-atv':  0,
+    'yd-atv':     0,
+    'today-k':    39.4,
+    'today-d':    10.7,
+    'today-n':    40.4,
+    'yd-k':       15.0,
+    'yd-d':       22.4,
+    'yd-n':       57.4,
+    // 近7天 vs 上7天（单位：万元）
+    '7d-k':       6839.8,
+    '7d-d':       11159.3,
+    '7d-n':       6153.0,
+    'p7d-k':      5257.7,
+    'p7d-d':      11275.4,
+    'p7d-n':      6261.3,
+    '7d-k-sellers':   0,
+    '7d-d-sellers':   0,
+    '7d-active-sellers': 0,
+    '7d-k-pit':   0,
+    '7d-n-price': 0,
+  };
+  localStorage.setItem('dm_nums_v1', JSON.stringify(nums));
+
+  // 突增突降（近7天 vs 上7天）
+  const anomaly = [
+    {"name":"宿咕的铁皮盒旗舰店","channel":"K播","cur":44.7,"prev":16.2},
+    {"name":"遂香记的店","channel":"商笔","cur":28.0,"prev":11.7},
+    {"name":"温小张的店","channel":"商笔","cur":24.7,"prev":8.8},
+    {"name":"宫门口馒头铺旗舰店","channel":"店播","cur":18.1,"prev":0.3},
+    {"name":"熊猫猪猪庄园旗舰店","channel":"K播","cur":16.3,"prev":0.6},
+    {"name":"南食召食品旗舰店","channel":"K播","cur":39.0,"prev":56.5},
+    {"name":"Mamiya旗舰店","channel":"K播","cur":12.7,"prev":22.6},
+    {"name":"董饱饱手作工坊的店","channel":"店播","cur":13.8,"prev":18.0}
+  ];
+  localStorage.setItem('dm_anomaly_v1', JSON.stringify(anomaly));
+
+  // 商家排行
+  const sellers = [
+    {"name":"宿咕的铁皮盒旗舰店","dgmv":44.7,"prev":16.2,"channel":"K播"},
+    {"name":"一群娃的妈妈是潘潘海外专营店","dgmv":44.1,"prev":null,"channel":"店播"},
+    {"name":"南食召食品旗舰店","dgmv":39.0,"prev":56.5,"channel":"K播"},
+    {"name":"沃尔玛旗舰店","dgmv":37.5,"prev":null,"channel":"商笔"},
+    {"name":"村驴的店","dgmv":32.4,"prev":25.2,"channel":"商笔"},
+    {"name":"锋味派旗舰店","dgmv":31.5,"prev":34.8,"channel":"商笔"},
+    {"name":"遂香记的店","dgmv":28.0,"prev":11.7,"channel":"商笔"},
+    {"name":"温小张的店","dgmv":24.7,"prev":8.8,"channel":"商笔"},
+    {"name":"小黄象旗舰店","dgmv":22.5,"prev":29.6,"channel":"K播"},
+    {"name":"宫门口馒头铺旗舰店","dgmv":18.1,"prev":0.3,"channel":"店播"},
+    {"name":"熊猫猪猪庄园旗舰店","dgmv":16.3,"prev":0.6,"channel":"K播"},
+    {"name":"小禾家零食分装的店","dgmv":14.8,"prev":10.4,"channel":"店播"},
+    {"name":"董饱饱手作工坊的店","dgmv":13.8,"prev":18.0,"channel":"店播"},
+    {"name":"三兔船长的店","dgmv":13.4,"prev":15.1,"channel":"商笔"},
+    {"name":"Mamiya旗舰店","dgmv":12.7,"prev":22.6,"channel":"K播"}
+  ];
+  localStorage.setItem('dm_sellers_v1', JSON.stringify(sellers));
+
+  // 昨日违规汇总（存在 goods 里临时用）
+  const vio = [
+    {"name":"笔记违规","dgmv":192,"channel":"涉及75家"},
+    {"name":"商品违规","dgmv":3,"channel":"涉及2家"},
+    {"name":"直播违规","dgmv":1,"channel":"涉及1家"}
+  ];
+  localStorage.setItem('dm_goods_v1', JSON.stringify(vio));
+}
+
+// 只在没有数据时 seed（不覆盖用户手动录入的）
+if (!localStorage.getItem('dm_nums_v1')) {
+  seedTodayData();
 }
 
 // ── Init ──
