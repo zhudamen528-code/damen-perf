@@ -1358,7 +1358,7 @@ function renderAll() {
 
   // ─ Page 2: Anomaly ─
   renderAnomaly();
-  renderCateAnomaly();
+  // renderCateAnomaly() 已由 renderCateAnomaly2() 替代
 
   // ─ Page 3: Seller ─
   const active = G('7d-active-sellers');
@@ -1759,17 +1759,59 @@ function drawTrendPlaceholder() {
   $('svg-area-tw').setAttribute('d', areaPath(pts2d));
 
   // 上周同期线
+  // 本期：04/09~04/22（14天），上周同期：04/02~04/15（14天）
+  // 对齐方式：上周第i天 对应 本期第i天（都画在同一X位置），直接比较同位序的值
+  // lwTrendData[0]=04/02 对应 trendData[0]=04/09，表示"比本期早7天的同期"
   const lwRaw = localStorage.getItem('dm_lw_trend_v1');
   if (lwRaw) {
     const lwData = JSON.parse(lwRaw);
-    // 上周同期 14 天(4/02-4/15)，与本期 14 天(4/09-4/22) 对齐绘制
-    // 取上周同期的后 7 天(4/09-4/15) → 对应本期的前 7 天位置
-    // 完整 14 天并排对比：上周每个点向右偏移 7 格（1周）
     const lwVals = lwData.map(d => d[1]);
-    // 直接以相同 X 绘制，意义是"上周同一天"的同期对比
+    // 用本期+上周同期合并确定Y轴范围，避免灰线超出图表
+    const allValsForRange = [...vals, ...lwVals];
+    const globalMinV = Math.min(...allValsForRange);
+    const globalMaxV = Math.max(...allValsForRange);
+    const globalRange = globalMaxV - globalMinV || 1;
+    // 重新计算本期点（用全局range）
+    const toXYGlobal = (v, i) => ({
+      x: pad + i * (W - 2*pad) / (nPts - 1),
+      y: H - pad - (v - globalMinV) / globalRange * (H - 2*pad)
+    });
+    const pts2dG = vals.map((v,i) => toXYGlobal(v, i));
+    $('svg-line-tw').setAttribute('points', ptStr(pts2dG));
+    $('svg-area-tw').setAttribute('d', areaPath(pts2dG));
+    // 重新画本期点（tooltip也要更新）
+    svg.querySelectorAll('.trend-dot, .trend-tooltip').forEach(e => e.remove());
+    pts2dG.forEach((p, i) => {
+      const isToday = i === pts2dG.length - 1;
+      const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y);
+      circle.setAttribute('r', isToday ? 4 : 3);
+      circle.setAttribute('fill', isToday ? '#ff2442' : 'rgba(255,36,66,0.7)');
+      circle.setAttribute('stroke','#fff'); circle.setAttribute('stroke-width','1.5');
+      circle.classList.add('trend-dot'); circle.style.cursor='pointer';
+      const tipW=80, tipH=32;
+      const tipX=Math.min(p.x-tipW/2, W-tipW-2);
+      const tipY=p.y<40?p.y+8:p.y-tipH-6;
+      const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.classList.add('trend-tooltip'); g.style.opacity='0'; g.style.pointerEvents='none'; g.style.transition='opacity 0.15s';
+      const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+      rect.setAttribute('x',tipX); rect.setAttribute('y',tipY); rect.setAttribute('width',tipW); rect.setAttribute('height',tipH); rect.setAttribute('rx','6'); rect.setAttribute('fill','rgba(17,24,39,0.88)');
+      const t1=document.createElementNS('http://www.w3.org/2000/svg','text');
+      t1.setAttribute('x',tipX+tipW/2); t1.setAttribute('y',tipY+13); t1.setAttribute('text-anchor','middle'); t1.setAttribute('fill','rgba(255,255,255,0.7)'); t1.setAttribute('font-size','9');
+      t1.textContent=labels[i]+(isToday?' 实时':'');
+      const t2=document.createElementNS('http://www.w3.org/2000/svg','text');
+      t2.setAttribute('x',tipX+tipW/2); t2.setAttribute('y',tipY+26); t2.setAttribute('text-anchor','middle'); t2.setAttribute('fill','#fff'); t2.setAttribute('font-size','11'); t2.setAttribute('font-weight','700');
+      t2.textContent=vals[i].toFixed(1)+'万';
+      g.appendChild(rect); g.appendChild(t1); g.appendChild(t2); svg.appendChild(g);
+      circle.addEventListener('mouseenter',()=>{g.style.opacity='1';});
+      circle.addEventListener('mouseleave',()=>{g.style.opacity='0';});
+      circle.addEventListener('touchstart',(e)=>{e.preventDefault();g.style.opacity='1';setTimeout(()=>g.style.opacity='0',2000);});
+      svg.appendChild(circle);
+    });
+    // 画上周同期灰线（同X位置，灰色虚线）
     const lwPts2d = lwVals.map((v, i) => ({
       x: pad + i * (W - 2*pad) / (nPts - 1),
-      y: H - pad - (v - minV) / range * (H - 2*pad)
+      y: H - pad - (v - globalMinV) / globalRange * (H - 2*pad)
     }));
     $('svg-line-lw').setAttribute('points', ptStr(lwPts2d));
     $('svg-area-lw').setAttribute('d', areaPath(lwPts2d));
