@@ -1040,8 +1040,8 @@
     <div class="divider"></div>
     <div class="stat-row">
       <div class="stat-item">
-        <div class="stat-label">平均单坑产出</div>
-        <div class="stat-value"><span id="k-pit">—</span><span class="unit">万</span></div>
+        <div class="stat-label">K播人均产出</div>
+        <div class="stat-value"><span id="k-pit">—</span><span class="unit">万/商</span></div>
       </div>
       <div class="stat-item">
         <div class="stat-label">K播成交占比</div>
@@ -1108,8 +1108,8 @@
     <div class="divider"></div>
     <div class="stat-row">
       <div class="stat-item">
-        <div class="stat-label">商笔件单价</div>
-        <div class="stat-value"><span id="n-price">—</span><span class="unit">元</span></div>
+        <div class="stat-label">商笔动销占比</div>
+        <div class="stat-value"><span id="n-price">—</span><span class="unit">%</span></div>
       </div>
       <div class="stat-item">
         <div class="stat-label">商笔占比</div>
@@ -1703,7 +1703,7 @@ function renderAll() {
     $('s-inactive').textContent = inactive;
     if (inactive > 30) { $('s-warn-badge').style.display='inline-flex'; }
   }
-  const kSellers = G('7d-k-sellers'), dSellers = G('7d-d-sellers');
+  const kSellers = G('7d-k-sellers'), dSellers = G('7d-d-sellers'), nSellers = G('7d-n-sellers');
   $('s-k-active').textContent = kSellers != null ? kSellers : '—';
   $('s-d-active').textContent = dSellers != null ? dSellers : '—';
   if (kSellers && active) $('s-k-pct').textContent = fmt(kSellers/active*100,0) + '%';
@@ -1729,10 +1729,14 @@ function renderAll() {
   }
   $('k-sellers').textContent = kSellers != null ? kSellers : '—';
   $('d-sellers').textContent = dSellers != null ? dSellers : '—';
-  const kPit = G('7d-k-pit');
-  $('k-pit').textContent = kPit != null ? fmt(kPit) : '—';
-  const nPrice = G('7d-n-price');
-  $('n-price').textContent = nPrice != null ? fmt(nPrice,0) : '—';
+  if ($('n-sellers')) $('n-sellers').textContent = nSellers != null ? nSellers : '—';
+  // K播人均产出 = K播DGMV / K播动销商家数
+  const kPit = (k7 != null && kSellers && kSellers > 0) ? k7 / kSellers : G('7d-k-pit');
+  $('k-pit').textContent = kPit != null && kPit > 0 ? fmt(kPit, 1) : '—';
+  // 商笔动销占比 = 商笔动销商家 / 活跃商家
+  const nSellersEl = $('n-sellers'); // 可能不存在
+  const nPrice = (n7 != null && total7 > 0) ? n7 / total7 * 100 : G('7d-n-price');
+  $('n-price').textContent = nPrice != null && nPrice > 0 ? fmt(nPrice, 1) : '—';
   if (total7 > 0) {
     $('k-share').textContent = fmt(k7/total7*100,0);
     $('n-share').textContent = fmt(n7/total7*100,0);
@@ -1980,9 +1984,32 @@ function drawTrendPlaceholder() {
   };
 
   $('svg-line-tw').setAttribute('points', ptStr(pts2d));
-  $('svg-line-lw').setAttribute('points', '');   // 暂不画上周同期
   $('svg-area-tw').setAttribute('d', areaPath(pts2d));
-  $('svg-area-lw').setAttribute('d', '');
+
+  // 上周同期线
+  const lwRaw = localStorage.getItem('dm_lw_trend_v1');
+  if (lwRaw) {
+    const lwData = JSON.parse(lwRaw);
+    const lwVals = lwData.map(d => d[1]);
+    const lwPts2d = lwVals.map((v, i) => ({
+      x: pad + i * (W - 2*pad) / (nPts - 1),
+      y: H - pad - (v - minV) / range * (H - 2*pad)
+    }));
+    $('svg-line-lw').setAttribute('points', ptStr(lwPts2d));
+    $('svg-area-lw').setAttribute('d', areaPath(lwPts2d));
+
+    // 上周同期 dots（小灰点，不加 tooltip，避免过于密集）
+    lwPts2d.forEach((p, i) => {
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx', p.x); c.setAttribute('cy', p.y); c.setAttribute('r', 2.5);
+      c.setAttribute('fill', 'rgba(156,163,175,0.7)'); c.setAttribute('stroke','#fff'); c.setAttribute('stroke-width','1');
+      c.classList.add('trend-dot');
+      svg.appendChild(c);
+    });
+  } else {
+    $('svg-line-lw').setAttribute('points', '');
+    $('svg-area-lw').setAttribute('d', '');
+  }
 
   // Dot 标注 + Tooltip
   // 移除旧的 dots
@@ -2071,9 +2098,14 @@ function seedTodayData() {
     'p7d-n':      6261.3,
     '7d-k-sellers':   120,
     '7d-d-sellers':   85,
+    '7d-n-sellers':   171, // 商笔动销商家（估算，近7天商笔 DGMV>0 的商家）
     '7d-active-sellers': 309,
-    '7d-k-pit':   0,
-    '7d-n-price': 0,
+    '7d-k-pit':   56.9,  // K播DGMV 6839.8万 / 120家 = 56.9万/商
+    '7d-n-price': 33.5,  // 商笔动销占比 ≈ 33.5%（商笔6153 / 总17152）
+    // 以下明细供 channel tab 使用
+    'k-share-pct': 39.9, // K播占总7天比
+    'n-share-pct': 35.9, // 商笔占总7天比
+    'd-share-pct': 65.0, // 店播占总7天比（含商卡）
   };
   localStorage.setItem('dm_nums_v1', JSON.stringify(nums));
 
@@ -2147,12 +2179,13 @@ function seedTodayData() {
   // 近14天趋势（万元）
   const trendData = [["04/09",39572],["04/10",44384],["04/11",52331],["04/12",49832],["04/13",37169],["04/14",39554],["04/15",40529],["04/16",41195],["04/17",43054],["04/18",56003],["04/19",56656],["04/20",39126],["04/21",40275],["04/22",12720]];
   localStorage.setItem('dm_trend_v1', JSON.stringify(trendData));
+  // 上周同期趋势（偏移7天）
+  const lwTrendData = [["04/02", 42155], ["04/03", 40851], ["04/04", 47410], ["04/05", 45200], ["04/06", 36835], ["04/07", 35140], ["04/08", 38788], ["04/09", 39572], ["04/10", 44384], ["04/11", 52331], ["04/12", 49832], ["04/13", 37169], ["04/14", 39554], ["04/15", 40529]];
+  localStorage.setItem('dm_lw_trend_v1', JSON.stringify(lwTrendData));
 }
 
-// 只在没有数据时 seed（不覆盖用户手动录入的）
-if (!localStorage.getItem('dm_nums_v1')) {
-  seedTodayData();
-}
+// 每次都强制 seed 最新数据（4/22 实时拉取，覆盖旧缓存）
+seedTodayData();
 
 // ── Init ──
 initDate();
