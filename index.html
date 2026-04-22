@@ -1241,7 +1241,99 @@ function switchTab(tab) {
 }
 
 
-// ── Storage keys ──
+// ══════════════════════════════════════════
+// 📊 数据区（每日更新这里即可，2026-04-22）
+// ══════════════════════════════════════════
+const DATA = {
+  // 近7天各场域（万元）
+  k7: 137.5, d7: 140.4, n7: 294.2,
+  // 上7天各场域（万元）
+  kp: 90.4, dp: 188.2, np: 370.2,
+  // 本双月累计（万元）
+  mtd: 7789.8,
+  // 动销商家数（近7天均值）
+  active: 238, kSellers: 12, dSellers: 25,
+  // K播人均产出（万/商）
+  kPit: 11.5,
+  // 商家 DGMV Top15（近7天，万元，含环比）
+  sellerTop: [
+    {name:"一群娃的妈妈是潘潘海外专营店", dgmv:55.9, pct:+21.3},
+    {name:"宿咕的铁皮盒旗舰店",          dgmv:46.1, pct:+218.5},
+    {name:"南食召食品旗舰店",            dgmv:44.9, pct:-2.3},
+    {name:"沃尔玛旗舰店",               dgmv:39.3, pct:+78.9},
+    {name:"村驴的店",                   dgmv:37.8, pct:-9.2},
+    {name:"锋味派旗舰店",               dgmv:37.8, pct:+21.5},
+    {name:"遂香记的店",                 dgmv:33.9, pct:+16.3},
+    {name:"温小张的店",                 dgmv:27.8, pct:+195.4},
+    {name:"小黄象旗舰店",               dgmv:26.3, pct:-13.7},
+    {name:"宫门口馒头铺旗舰店",          dgmv:21.9, pct:-13.8},
+    {name:"小禾家零食分装的店",          dgmv:17.7, pct:-37.4},
+    {name:"熊猫猪猪庄园旗舰店",          dgmv:16.9, pct:+362.8},
+    {name:"董饱饱手作工坊的店",          dgmv:16.3, pct:-15.3},
+    {name:"Mamiya旗舰店",              dgmv:16.2, pct:-8.9},
+    {name:"paldo食品旗舰店",           dgmv:15.7, pct:-39.0},
+  ],
+  // 突增突降商家（近3天 vs 上3天）
+  anomaly: [
+    {name:"沃尔玛旗舰店",               cur:23.3, prev:14.0, dir:"up"},
+    {name:"小黄象旗舰店",               cur:13.0, prev:9.5,  dir:"up"},
+    {name:"温小张的店",                 cur:13.1, prev:11.6, dir:"up"},
+    {name:"锋味派旗舰店",               cur:15.7, prev:15.8, dir:"up"},
+    {name:"宫门口馒头铺旗舰店",          cur:9.2,  prev:8.3,  dir:"up"},
+    {name:"宿咕的铁皮盒旗舰店",          cur:14.2, prev:30.6, dir:"down"},
+    {name:"一群娃的妈妈是潘潘海外专营店", cur:19.0, prev:25.2, dir:"down"},
+    {name:"南食召食品旗舰店",            cur:16.9, prev:22.1, dir:"down"},
+    {name:"遂香记的店",                 cur:12.4, prev:15.6, dir:"down"},
+    {name:"村驴的店",                   cur:15.3, prev:17.1, dir:"down"},
+  ],
+  // 品类突增突降
+  cate: [
+    {name:"饼干/膨化",       cur:117.4, prev:89.7,  dir:"up"},
+    {name:"液态奶/乳制品",   cur:34.4,  prev:20.7,  dir:"up"},
+    {name:"熟食/卤味",       cur:56.2,  prev:41.4,  dir:"up"},
+    {name:"粽子",           cur:32.8,  prev:27.6,  dir:"up"},
+    {name:"方便粉丝/米线",   cur:63.2,  prev:72.6,  dir:"down"},
+    {name:"巧克力",         cur:152.2, prev:165.8,  dir:"down"},
+    {name:"糖果零食",        cur:32.9,  prev:38.0,  dir:"down"},
+    {name:"方便面/拉面",     cur:79.5,  prev:84.5,  dir:"down"},
+  ],
+  // 主力买手 TOP5
+  buyers: [
+    {name:"董洁",            dgmv:54.0},
+    {name:"云朵的美味佳肴",   dgmv:11.3},
+    {name:"胡静",            dgmv:10.3},
+    {name:"李诞",            dgmv:7.8},
+    {name:"小贝饿了",        dgmv:5.2},
+  ],
+  // 店播 TOP5
+  dTop: [
+    {name:"一群娃的妈妈是潘潘海外专营店", dgmv:46.3},
+    {name:"宫门口馒头铺旗舰店",          dgmv:16.0},
+    {name:"小黄象旗舰店",               dgmv:11.2},
+    {name:"小禾家零食分装的店",          dgmv:11.0},
+    {name:"paldo食品旗舰店",           dgmv:11.0},
+  ],
+  // 商家分层（近7天DGMV口径）
+  tier: {b5p:1, b4:9, b3:16, b2:27, b1:5, b0:43},
+  // 低动销商家（近7天DGMV=0）
+  inactive: ["WINDEL旗舰店","亿滋旗舰店","甄甄优选的店","田园猎手零食的店",
+    "WHITELY TOMATO CUBE的店","糙能农场儿童面专卖店","只有一间手工烘焙的店",
+    "瑞特滋RITTERSPORT旗舰店","桂潮食品的店","旺旺碎冰冰旗舰店"],
+  // 品类×场域热力
+  heatmap: [
+    {cate:"零食/坚果",     k:56.1, d:82.6, n:206.5},
+    {cate:"粮油/速食",     k:82.4, d:76.8, n:166.6},
+    {cate:"水产/蔬果",     k:0,    d:0,    n:88.1},
+    {cate:"乳品/奶粉",     k:0,    d:22.4, n:34.4},
+    {cate:"茶饮/饮料",     k:0,    d:0,    n:8.0},
+  ],
+  // 近14天趋势（万元，大门个人口径）
+  trend: [[" 04/09",144.9],[" 04/10",132.8],[" 04/11",129.4],["04/12",132.2],["04/13",146.8],["04/14",159.8],["04/15",143.2],["04/16",155.0],["04/17",120.9],["04/18",164.0],["04/19",130.0],["04/20",134.4],["04/21",146.7],["04/22",127.2]],
+  // 上周同期（4/02-4/15，对应本期14个位置）
+  lwTrend: [["04/02",192.3],["04/03",137.2],["04/04",108.6],["04/05",103.4],["04/06",117.9],["04/07",133.1],["04/08",152.0],["04/09",144.9],["04/10",132.8],["04/11",129.4],["04/12",132.2],["04/13",146.8],["04/14",159.8],["04/15",143.2]],
+};
+
+// ── Storage keys（保留供兼容）──
 const KEYS = {
   nums: 'dm_nums_v1',
   anomaly: 'dm_anomaly_v1',
@@ -1269,30 +1361,16 @@ function loadInputsFromStorage() {
 
 // ── RENDER ALL ──
 function renderAll() {
-  const nums = JSON.parse(localStorage.getItem(KEYS.nums) || '{}');
-  const G = k => nums[k] ?? null;
-
-  // ─ Page 1: Today ─
-  const todayDgmv = G('today-dgmv');
-  const ydDgmv    = G('yd-dgmv');
-  const lwDgmv    = G('lw-dgmv');
-  const mtdDgmv   = G('mtd-dgmv');
-
-  $('t-dgmv-val').textContent = todayDgmv != null ? fmt(todayDgmv) : '—';
-  $('t-dgmv-yd').textContent  = ydDgmv != null ? fmt(ydDgmv) : '—';
-  $('t-dgmv-lw').textContent  = lwDgmv != null ? fmt(lwDgmv) : '—';
-  $('t-dgmv-mtd').textContent = mtdDgmv != null ? fmt(mtdDgmv,0) : '—';
-  setChange($('t-dgmv-dod-pct'), todayDgmv, ydDgmv);
-  if (todayDgmv != null && ydDgmv != null) {
-    const pct = pctChange(todayDgmv, ydDgmv);
-    const el = $('t-dgmv-dod-pct');
-    el.textContent = (pct>0?'▲':'▼') + ' ' + Math.abs(pct).toFixed(1) + '% vs 昨日';
-    el.className = 'stat-change ' + (pct>0?'up':'down');
-  }
+  // ── 直接从 DATA 常量读取（不依赖 localStorage）──
+  const k7=DATA.k7, d7=DATA.d7, n7=DATA.n7;
+  const kp=DATA.kp, dp=DATA.dp, np=DATA.np;
+  const total7 = k7+d7+n7;
+  const kSellers=DATA.kSellers, dSellers=DATA.dSellers, active=DATA.active;
 
   // 本双月进度条
   const MTD_TARGET = 14536.9;
-  if (mtdDgmv != null) {
+  const mtdDgmv = DATA.mtd;
+  {
     const pct = Math.min(mtdDgmv / MTD_TARGET * 100, 100);
     const bar = $('mtd-progress-bar');
     if (bar) { bar.style.width = pct.toFixed(1) + '%'; }
@@ -1302,21 +1380,7 @@ function renderAll() {
     if (remain) { remain.textContent = '剩余：' + fmt(Math.max(MTD_TARGET - mtdDgmv, 0), 1) + '万'; }
   }
 
-  // Today channel
-  const todayK=G('today-k'), ydK=G('yd-k');
-  const todayD=G('today-d'), ydD=G('yd-d');
-  const todayN=G('today-n'), ydN=G('yd-n');
-  $('t-k-val').textContent = todayK!=null ? fmt(todayK) : '—';
-  $('t-d-val').textContent = todayD!=null ? fmt(todayD) : '—';
-  $('t-n-val').textContent = todayN!=null ? fmt(todayN) : '—';
-  setDeltaEl($('t-k-delta'), todayK, ydK);
-  setDeltaEl($('t-d-delta'), todayD, ydD);
-  setDeltaEl($('t-n-delta'), todayN, ydN);
-
   // ─ Page 2: Trend (7d channel) ─
-  const k7=G('7d-k'), d7=G('7d-d'), n7=G('7d-n');
-  const kp=G('p7d-k'), dp=G('p7d-d'), np=G('p7d-n');
-  const total7 = (k7||0)+(d7||0)+(n7||0);
 
   if (total7 > 0) {
     const kPct = Math.round(k7/total7*100);
@@ -1341,52 +1405,52 @@ function renderAll() {
   renderChannelBars(k7, d7, n7, kp, dp, np);
 
   // ─ Page 2: Anomaly ─
-  renderAnomaly();
+  renderAnomaly(DATA.anomaly);
   // renderCateAnomaly() 已由 renderCateAnomaly2() 替代
 
   // ─ Page 3: Seller ─
-  const active = G('7d-active-sellers');
-  $('s-active').textContent = active != null ? active : '—';
-  if (active != null) {
+  // active 已由 DATA.active 定义
+  $('s-active').textContent = active;
+  if (active) {
     $('s-active-pct').textContent = '动销率 ' + fmt(active/309*100,0) + '%';
     $('s-active-pct').className = 'stat-change ' + (active/309 > 0.6 ? 'down' : 'up');
     const inactive = 309 - active;
     $('s-inactive').textContent = inactive;
     if (inactive > 30) { $('s-warn-badge').style.display='inline-flex'; }
   }
-  const kSellers = G('7d-k-sellers'), dSellers = G('7d-d-sellers'), nSellers = G('7d-n-sellers');
-  $('s-k-active').textContent = kSellers != null ? kSellers : '—';
-  $('s-d-active').textContent = dSellers != null ? dSellers : '—';
+  const nSellers = null;  // 商笔动销商家数暂无
+  $('s-k-active').textContent = kSellers ?? '—';
+  $('s-d-active').textContent = dSellers ?? '—';
   if (kSellers && active) $('s-k-pct').textContent = fmt(kSellers/active*100,0) + '%';
   if (dSellers && active) $('s-d-pct').textContent = fmt(dSellers/active*100,0) + '%';
 
-  renderSellerTable();
+  renderSellerTable(DATA.sellerTop);
 
   // ─ Page 4: Channel detail ─
-  $('k-dgmv').textContent = k7 != null ? fmt(k7) : '—';
-  $('d-dgmv').textContent = d7 != null ? fmt(d7) : '—';
-  $('n-dgmv').textContent = n7 != null ? fmt(n7) : '—';
-  if (k7!=null && kp!=null) {
+  $('k-dgmv').textContent = fmt(k7);
+  $('d-dgmv').textContent = fmt(d7);
+  $('n-dgmv').textContent = fmt(n7);
+  {
     const pct = pctChange(k7, kp);
     const el=$('k-dgmv-chg'); el.textContent=(pct>0?'▲':'▼')+Math.abs(pct).toFixed(1)+'% vs 上7天'; el.className='stat-change '+(pct>0?'up':'down');
   }
-  if (d7!=null && dp!=null) {
+  {
     const pct = pctChange(d7, dp);
     const el=$('d-dgmv-chg'); el.textContent=(pct>0?'▲':'▼')+Math.abs(pct).toFixed(1)+'% vs 上7天'; el.className='stat-change '+(pct>0?'up':'down');
   }
-  if (n7!=null && np!=null) {
+  {
     const pct = pctChange(n7, np);
     const el=$('n-dgmv-chg'); el.textContent=(pct>0?'▲':'▼')+Math.abs(pct).toFixed(1)+'% vs 上7天'; el.className='stat-change '+(pct>0?'up':'down');
   }
-  $('k-sellers').textContent = kSellers != null ? kSellers : '—';
-  $('d-sellers').textContent = dSellers != null ? dSellers : '—';
+  $('k-sellers').textContent = kSellers ?? '—';
+  $('d-sellers').textContent = dSellers ?? '—';
   if ($('n-sellers')) $('n-sellers').textContent = nSellers != null ? nSellers : '—';
   // K播人均产出 = K播DGMV / K播动销商家数
-  const kPit = (k7 != null && kSellers && kSellers > 0) ? k7 / kSellers : G('7d-k-pit');
+  const kPit = DATA.kPit;
   $('k-pit').textContent = kPit != null && kPit > 0 ? fmt(kPit, 1) : '—';
   // 商笔动销占比 = 商笔动销商家 / 活跃商家
   const nSellersEl = $('n-sellers'); // 可能不存在
-  const nPrice = (n7 != null && total7 > 0) ? n7 / total7 * 100 : G('7d-n-price');
+  const nPrice = total7 > 0 ? n7 / total7 * 100 : null;
   $('n-price').textContent = nPrice != null && nPrice > 0 ? fmt(nPrice, 1) : '—';
   if (total7 > 0) {
     $('k-share').textContent = fmt(k7/total7*100,0);
@@ -1394,14 +1458,14 @@ function renderAll() {
   }
 
   // ─ Page 3: 补充 - 商家分层 & 低动销 & 主力买手 & 店播TOP5 ─
-  renderTier();
-  renderInactive();
-  renderBuyers();
-  renderDTop();
+  renderTier(DATA.tier);
+  renderInactive(DATA.inactive);
+  renderBuyers(DATA.buyers);
+  renderDTop(DATA.dTop);
 
   // ─ Page 5: Goods ─
-  renderCateAnomaly2();
-  renderHeatmap();
+  renderCateAnomaly2(DATA.cate);
+  renderHeatmap(DATA.heatmap);
 }
 
 // ── Channel bars render ──
@@ -1438,11 +1502,8 @@ function renderChannelBars(k7, d7, n7, kp, dp, np) {
 }
 
 // ── Anomaly render ──
-function renderAnomaly() {
-  const raw = localStorage.getItem(KEYS.anomaly);
-  if (!raw) return;
-  let data;
-  try { data = JSON.parse(raw); } catch(e) { return; }
+function renderAnomaly(data) {
+  if (!data || !data.length) return;
 
   data.forEach(d => { d._delta = d.cur - d.prev; d._pct = pctChange(d.cur, d.prev); });
   // 支持 dir 字段直接分组（也兼容旧的通过 delta 计算）
@@ -1502,11 +1563,8 @@ function renderCateAnomaly() {
 }
 
 // ── Seller table ──
-function renderSellerTable() {
-  const raw = localStorage.getItem(KEYS.sellers);
-  if (!raw) return;
-  let data;
-  try { data = JSON.parse(raw); } catch(e) { return; }
+function renderSellerTable(data) {
+  if (!data || !data.length) { $('seller-tbody').innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-label); font-size:12px; padding:20px;">暂无数据</td></tr>'; return; }
   data.sort((a,b) => b.dgmv - a.dgmv);
   const tbody = $('seller-tbody');
   const channelPill = ch => {
@@ -1529,10 +1587,8 @@ function renderSellerTable() {
 }
 
 // ── 商家分层 ──
-function renderTier() {
-  const raw = localStorage.getItem('dm_tier_v1');
-  if (!raw) return;
-  let t; try { t = JSON.parse(raw); } catch(e) { return; }
+function renderTier(t) {
+  if (!t) return;
   const el = $('tier-bars');
   if (!el) return;
   const total = (t.b5p||0)+(t.b4||0)+(t.b3||0)+(t.b2||0)+(t.b1||0)+(t.b0||0);
@@ -1556,10 +1612,8 @@ function renderTier() {
 }
 
 // ── 低动销商家 ──
-function renderInactive() {
-  const raw = localStorage.getItem('dm_inactive_v1');
-  if (!raw) return;
-  let data; try { data = JSON.parse(raw); } catch(e) { return; }
+function renderInactive(data) {
+  if (!data || !data.length) return;
   const el = $('inactive-list');
   if (!el) return;
   el.innerHTML = data.map(name => `
@@ -1572,10 +1626,8 @@ function renderInactive() {
 }
 
 // ── 主力买手 TOP5 ──
-function renderBuyers() {
-  const raw = localStorage.getItem('dm_buyers_v1');
-  if (!raw) return;
-  let data; try { data = JSON.parse(raw); } catch(e) { return; }
+function renderBuyers(data) {
+  if (!data || !data.length) return;
   const el = $('k-buyer-list');
   if (!el) return;
   el.innerHTML = data.map((d, i) => `
@@ -1588,10 +1640,8 @@ function renderBuyers() {
 }
 
 // ── 店播 TOP5 ──
-function renderDTop() {
-  const raw = localStorage.getItem('dm_d_sellers_v1');
-  if (!raw) return;
-  let data; try { data = JSON.parse(raw); } catch(e) { return; }
+function renderDTop(data) {
+  if (!data || !data.length) return;
   const el = $('d-top-list');
   if (!el) return;
   el.innerHTML = data.map((d, i) => `
@@ -1604,10 +1654,8 @@ function renderDTop() {
 }
 
 // ── 品类突增突降（替代原 renderCateAnomaly）──
-function renderCateAnomaly2() {
-  const raw = localStorage.getItem('dm_cate_v1');
-  if (!raw) { renderCateAnomaly(); return; }
-  let data; try { data = JSON.parse(raw); } catch(e) { return; }
+function renderCateAnomaly2(data) {
+  if (!data || !data.length) return;
   const surges = data.filter(d => d.dir==='up').sort((a,b) => (b.cur-b.prev)-(a.cur-a.prev));
   const drops  = data.filter(d => d.dir==='down').sort((a,b) => (a.cur-a.prev)-(b.cur-b.prev));
 
@@ -1669,11 +1717,8 @@ function renderPriceBands() {
 }
 
 // ── Heatmap ──
-function renderHeatmap() {
-  const raw = localStorage.getItem(KEYS.heatmap);
-  if (!raw) return;
-  let data;
-  try { data = JSON.parse(raw); } catch(e) { return; }
+function renderHeatmap(data) {
+  if (!data || !data.length) return;
   data.sort((a,b) => (b.k+b.d+b.n) - (a.k+a.d+a.n));
 
   // find max for heat coloring
@@ -1709,19 +1754,9 @@ function drawTrendPlaceholder() {
   const svg = $('trend-svg');
   const W = 340, H = 100, pad = 10;
 
-  let labels, vals;
-  if (trendRaw) {
-    const trendData = JSON.parse(trendRaw);
-    labels = trendData.map(d => d[0]);
-    vals   = trendData.map(d => d[1]);
-  } else {
-    const pts = 14;
-    vals   = Array.from({length:pts}, (_,i) => 40 + 35*Math.sin(i*0.7) + 5*Math.sin(i*2.1));
-    labels = Array.from({length:pts}, (_,i) => {
-      const d = new Date(); d.setDate(d.getDate() - (13-i));
-      return `${d.getMonth()+1}/${d.getDate()}`;
-    });
-  }
+  // 直接用 DATA 常量（不再依赖 localStorage）
+  const labels = DATA.trend.map(d => d[0]);
+  const vals   = DATA.trend.map(d => d[1]);
 
   const minV = Math.min(...vals), maxV = Math.max(...vals);
   const range = maxV - minV || 1;
@@ -1746,9 +1781,9 @@ function drawTrendPlaceholder() {
   // 本期：04/09~04/22（14天），上周同期：04/02~04/15（14天）
   // 对齐方式：上周第i天 对应 本期第i天（都画在同一X位置），直接比较同位序的值
   // lwTrendData[0]=04/02 对应 trendData[0]=04/09，表示"比本期早7天的同期"
-  const lwRaw = localStorage.getItem('dm_lw_trend_v1');
-  if (lwRaw) {
-    const lwData = JSON.parse(lwRaw);
+  // 上周同期直接从 DATA.lwTrend 读取
+  {
+    const lwData = DATA.lwTrend;
     const lwVals = lwData.map(d => d[1]);
     // 用本期+上周同期合并确定Y轴范围，避免灰线超出图表
     const allValsForRange = [...vals, ...lwVals];
@@ -1980,7 +2015,7 @@ function seedTodayData() {
 
   // 近14天趋势（万元）
   const trendData = [["04/09", 144.9], ["04/10", 132.8], ["04/11", 129.4], ["04/12", 132.2], ["04/13", 146.8], ["04/14", 159.8], ["04/15", 143.2], ["04/16", 155.0], ["04/17", 120.9], ["04/18", 164.0], ["04/19", 130.0], ["04/20", 134.4], ["04/21", 146.7], ["04/22", 127.2]];
-  localStorage.setItem('dm_trend_v1', JSON.stringify(trendData));
+  // trend data 已写入 DATA.trend，此处 localStorage 调用已废弃
   // 上周同期趋势（4/02-4/15，对齐本期）
   const lwTrendData = [["04/02", 192.3], ["04/03", 137.2], ["04/04", 108.6], ["04/05", 103.4], ["04/06", 117.9], ["04/07", 133.1], ["04/08", 152.0], ["04/09", 144.9], ["04/10", 132.8], ["04/11", 129.4], ["04/12", 132.2], ["04/13", 146.8], ["04/14", 159.8], ["04/15", 143.2]];
   localStorage.setItem('dm_lw_trend_v1', JSON.stringify(lwTrendData));
