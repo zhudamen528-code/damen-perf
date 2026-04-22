@@ -564,10 +564,8 @@
     </div>
   </div>
   <nav class="tab-nav">
-    <div class="tab-item active" data-tab="today" onclick="switchTab('today')">
-      <span class="tab-icon">🔴</span>今日实时
-    </div>
-    <div class="tab-item" data-tab="trend" onclick="switchTab('trend')">
+    <div class="tab-item active" 
+    <div class="tab-item active" data-tab="trend" onclick="switchTab('trend')" class="tab-item active">
       <span class="tab-icon">📈</span>趋势&异动
     </div>
     <div class="tab-item" data-tab="seller" onclick="switchTab('seller')">
@@ -592,124 +590,11 @@
 <!-- ═══════════════════════════════════════════
      PAGE 1：今日实时
 ═══════════════════════════════════════════ -->
-<div class="page active" id="page-today">
-
-  <!-- 今日核心指标 -->
-  <div class="section-title">
-    <span class="s-icon">⚡</span>今日核心指标
-    <span class="s-badge">实时</span>
-  </div>
-
-  <div class="card">
-    <div class="card-title">
-      <span class="ct-dot" style="background:var(--red)"></span>
-      今日累计 DGMV
-    </div>
-    <div class="stat-row">
-      <div class="stat-item" style="grid-column: span 2; background: linear-gradient(135deg,#fff0f2,#fff);">
-        <div class="stat-label">今日累计成交额</div>
-        <div class="stat-value big"><span id="t-dgmv-val">—</span><span class="unit"> 万</span></div>
-        <div style="display:flex; gap:8px; margin-top:6px; flex-wrap:wrap;">
-          <span class="stat-change" id="t-dgmv-dod-pct">环比昨日 —</span>
-          <span class="stat-change flat" id="t-dgmv-target-pct">目标进度 —</span>
-        </div>
-      </div>
-    </div>
-    <div class="divider"></div>
-    <div class="stat-row cols3">
-      <div class="stat-item">
-        <div class="stat-label">昨日同期</div>
-        <div class="stat-value"><span id="t-dgmv-yd">—</span><span class="unit">万</span></div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-label">上周同期</div>
-        <div class="stat-value"><span id="t-dgmv-lw">—</span><span class="unit">万</span></div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-label">本双月累计 MTD</div>
-        <div class="stat-value"><span id="t-dgmv-mtd">—</span><span class="unit">万</span></div>
-      </div>
-    </div>
-    <!-- 本双月进度条 -->
-    <div style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <span style="font-size:12px; color:var(--text-sub);">本双月目标进度</span>
-        <span style="font-size:12px; font-weight:700;" id="mtd-pct-text">—</span>
-      </div>
-      <div style="height:8px; background:#f3f4f6; border-radius:4px; overflow:hidden;">
-        <div id="mtd-progress-bar" style="height:100%; width:0%; background:linear-gradient(90deg,#ff2442,#ff6b6b); border-radius:4px; transition:width 0.6s;"></div>
-      </div>
-      <div style="display:flex; justify-content:space-between; margin-top:4px;">
-        <span style="font-size:10px; color:var(--text-label);">目标：14536.9万</span>
-        <span style="font-size:10px; color:var(--text-label);" id="mtd-remain-text">剩余：—</span>
-      </div>
-    </div>
-    <div class="last-updated">💡 数据截至当日最后更新时点，实时数据已自动拉取</div>
-  </div>
-
-
-  <!-- 今日分场域<!-- 今日分场域 -->
-  <div class="section-title">
-    <span class="s-icon">🎯</span>今日分场域表现
-  </div>
-
-  <div class="card">
-    <div class="card-title">
-      <span class="ct-dot" style="background:var(--purple)"></span>
-      K播 / 店播 / 商笔 今日 vs 昨日
-    </div>
-    <div class="mini-bar-wrap" id="today-channel-bars">
-      <!-- JS 填充 -->
-      <div class="metric-delta-row">
-        <div class="mdr-left">
-          <div class="icon-circle" style="background:#fff0f2;">📹</div>
-          <div>
-            <div class="mdr-name">K播</div>
-            <div class="mdr-sub">买手直播成交</div>
-          </div>
-        </div>
-        <div class="mdr-right">
-          <div class="mdr-val"><span id="t-k-val">—</span><span style="font-size:11px;color:var(--text-sub)"> 万</span></div>
-          <div class="mdr-delta" id="t-k-delta">—</div>
-        </div>
-      </div>
-      <div class="metric-delta-row">
-        <div class="mdr-left">
-          <div class="icon-circle" style="background:#eff6ff;">🏪</div>
-          <div>
-            <div class="mdr-name">店播</div>
-            <div class="mdr-sub">商家自播成交</div>
-          </div>
-        </div>
-        <div class="mdr-right">
-          <div class="mdr-val"><span id="t-d-val">—</span><span style="font-size:11px;color:var(--text-sub)"> 万</span></div>
-          <div class="mdr-delta" id="t-d-delta">—</div>
-        </div>
-      </div>
-      <div class="metric-delta-row">
-        <div class="mdr-left">
-          <div class="icon-circle" style="background:#ecfdf5;">📝</div>
-          <div>
-            <div class="mdr-name">商品笔记</div>
-            <div class="mdr-sub">笔记挂链成交</div>
-          </div>
-        </div>
-        <div class="mdr-right">
-          <div class="mdr-val"><span id="t-n-val">—</span><span style="font-size:11px;color:var(--text-sub)"> 万</span></div>
-          <div class="mdr-delta" id="t-n-delta">—</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-
-</div>
 
 <!-- ═══════════════════════════════════════════
      PAGE 2：趋势 & 异动
 ═══════════════════════════════════════════ -->
-<div class="page" id="page-trend">
+<div class="page active" id="page-trend">
 
   <!-- 近14天趋势 -->
   <div class="section-title">
@@ -944,9 +829,8 @@
       <span class="ct-dot" style="background:var(--blue)"></span>
       B 分层商家数（B0~B6）
     </div>
-    <div class="mini-bar-wrap" id="b-level-bars">
+    <div class="mini-bar-wrap" id="tier-bars">
       <!-- JS 填充 -->
-      <div style="text-align:center; padding:12px; color:var(--text-label); font-size:12px;">录入数据后显示</div>
     </div>
     <div class="data-source-note">B6=月销最高档，B0=未动销或极低</div>
   </div>
@@ -1069,8 +953,8 @@
       <span class="ct-dot" style="background:var(--blue)"></span>
       近7天最活跃店播商家 Top5
     </div>
-    <div id="d-seller-list">
-      <div class="empty-hint" style="padding:10px 0; font-size:12px;">录入数据后显示</div>
+    <div id="d-top-list">
+      <!-- JS 填充 -->
     </div>
   </div>
 
@@ -1525,9 +1409,14 @@ function renderAll() {
     $('n-share').textContent = fmt(n7/total7*100,0);
   }
 
+  // ─ Page 3: 补充 - 商家分层 & 低动销 & 主力买手 & 店播TOP5 ─
+  renderTier();
+  renderInactive();
+  renderBuyers();
+  renderDTop();
+
   // ─ Page 5: Goods ─
-  renderGoodsTable();
-  renderPriceBands();
+  renderCateAnomaly2();
   renderHeatmap();
 }
 
@@ -1655,6 +1544,106 @@ function renderSellerTable() {
   }).join('');
 }
 
+// ── 商家分层 ──
+function renderTier() {
+  const raw = localStorage.getItem('dm_tier_v1');
+  if (!raw) return;
+  let t; try { t = JSON.parse(raw); } catch(e) { return; }
+  const el = $('tier-bars');
+  if (!el) return;
+  const total = (t.b5p||0)+(t.b4||0)+(t.b3||0)+(t.b2||0)+(t.b1||0)+(t.b0||0);
+  const tiers = [
+    {label:'B5+(>50万)',count:t.b5p||0,color:'#ff2442'},
+    {label:'B4(20-50万)',count:t.b4||0,color:'#f59e0b'},
+    {label:'B3(10-20万)',count:t.b3||0,color:'#3b82f6'},
+    {label:'B2(5-10万)',count:t.b2||0,color:'#8b5cf6'},
+    {label:'B1(<5万)',count:t.b1||0,color:'#00b578'},
+    {label:'B0/未动销',count:t.b0||0,color:'#e5e7eb'},
+  ];
+  el.innerHTML = tiers.map(tier => `
+    <div class="mini-bar-row">
+      <div class="mini-bar-label" style="width:90px; font-size:11px;">${tier.label}</div>
+      <div class="mini-bar-track">
+        <div class="mini-bar-fill" style="width:${Math.round(tier.count/total*100)}%; background:${tier.color};"></div>
+      </div>
+      <div class="mini-bar-val" style="font-weight:700;">${tier.count}家</div>
+    </div>
+  `).join('');
+}
+
+// ── 低动销商家 ──
+function renderInactive() {
+  const raw = localStorage.getItem('dm_inactive_v1');
+  if (!raw) return;
+  let data; try { data = JSON.parse(raw); } catch(e) { return; }
+  const el = $('inactive-list');
+  if (!el) return;
+  el.innerHTML = data.map(name => `
+    <div style="display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #f3f4f6;">
+      <span style="font-size:13px;">⚠️</span>
+      <span style="font-size:13px; font-weight:500;">${name}</span>
+      <span style="margin-left:auto; font-size:11px; color:var(--red); font-weight:600;">近7天无成交</span>
+    </div>
+  `).join('') + `<div style="font-size:11px; color:var(--text-label); margin-top:8px;">共 ${data.length}+ 家，仅展示部分</div>`;
+}
+
+// ── 主力买手 TOP5 ──
+function renderBuyers() {
+  const raw = localStorage.getItem('dm_buyers_v1');
+  if (!raw) return;
+  let data; try { data = JSON.parse(raw); } catch(e) { return; }
+  const el = $('k-buyer-list');
+  if (!el) return;
+  el.innerHTML = data.map((d, i) => `
+    <div style="display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #f3f4f6;">
+      <div style="width:22px; height:22px; border-radius:50%; background:${['#ff2442','#f59e0b','#3b82f6','#8b5cf6','#00b578'][i]}; color:#fff; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center;">${i+1}</div>
+      <div style="flex:1; font-size:13px; font-weight:600;">${d.name}</div>
+      <div style="font-size:13px; font-weight:700; color:var(--red);">${fmt(d.dgmv)}万</div>
+    </div>
+  `).join('');
+}
+
+// ── 店播 TOP5 ──
+function renderDTop() {
+  const raw = localStorage.getItem('dm_d_sellers_v1');
+  if (!raw) return;
+  let data; try { data = JSON.parse(raw); } catch(e) { return; }
+  const el = $('d-top-list');
+  if (!el) return;
+  el.innerHTML = data.map((d, i) => `
+    <div style="display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #f3f4f6;">
+      <div style="width:22px; height:22px; border-radius:50%; background:${['#3b82f6','#60a5fa','#93c5fd','#bfdbfe','#dbeafe'][i]}; color:${i<2?'#fff':'#1e3a8a'}; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center;">${i+1}</div>
+      <div style="flex:1; font-size:13px; font-weight:600;">${d.name}</div>
+      <div style="font-size:13px; font-weight:700; color:var(--blue);">${fmt(d.dgmv)}万</div>
+    </div>
+  `).join('');
+}
+
+// ── 品类突增突降（替代原 renderCateAnomaly）──
+function renderCateAnomaly2() {
+  const raw = localStorage.getItem('dm_cate_v1');
+  if (!raw) { renderCateAnomaly(); return; }
+  let data; try { data = JSON.parse(raw); } catch(e) { return; }
+  const surges = data.filter(d => d.dir==='up').sort((a,b) => (b.cur-b.prev)-(a.cur-a.prev));
+  const drops  = data.filter(d => d.dir==='down').sort((a,b) => (a.cur-a.prev)-(b.cur-b.prev));
+
+  const miniItem = (d, type) => {
+    const delta = d.cur - d.prev;
+    const pct = d.prev > 0 ? (delta/d.prev*100).toFixed(0) : '—';
+    const color = type==='surge' ? 'var(--red)' : 'var(--green)';
+    return `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #f3f4f6; font-size:12px;">
+      <div style="font-weight:600;">${d.name}</div>
+      <div style="text-align:right;">
+        <div style="font-weight:700; color:${color};">${type==='surge'?'+':''}${fmt(delta)}万</div>
+        <div style="font-size:10px; color:${color};">${type==='surge'?'▲':'▼'}${Math.abs(parseFloat(pct))}%</div>
+      </div>
+    </div>`;
+  };
+  const el1=$('cate-surge-list'), el2=$('cate-drop-list');
+  if(el1) el1.innerHTML = surges.map(d=>miniItem(d,'surge')).join('') || '<div style="color:var(--text-label);font-size:12px;padding:8px 0;">暂无</div>';
+  if(el2) el2.innerHTML = drops.map(d=>miniItem(d,'drop')).join('')  || '<div style="color:var(--text-label);font-size:12px;padding:8px 0;">暂无</div>';
+}
+
 // ── Goods table ──
 function renderGoodsTable() {
   const raw = localStorage.getItem(KEYS.goods);
@@ -1773,7 +1762,11 @@ function drawTrendPlaceholder() {
   const lwRaw = localStorage.getItem('dm_lw_trend_v1');
   if (lwRaw) {
     const lwData = JSON.parse(lwRaw);
+    // 上周同期 14 天(4/02-4/15)，与本期 14 天(4/09-4/22) 对齐绘制
+    // 取上周同期的后 7 天(4/09-4/15) → 对应本期的前 7 天位置
+    // 完整 14 天并排对比：上周每个点向右偏移 7 格（1周）
     const lwVals = lwData.map(d => d[1]);
+    // 直接以相同 X 绘制，意义是"上周同一天"的同期对比
     const lwPts2d = lwVals.map((v, i) => ({
       x: pad + i * (W - 2*pad) / (nPts - 1),
       y: H - pad - (v - minV) / range * (H - 2*pad)
@@ -1965,6 +1958,19 @@ function seedTodayData() {
   // 上周同期趋势（4/02-4/15，对齐本期）
   const lwTrendData = [["04/02", 192.3], ["04/03", 137.2], ["04/04", 108.6], ["04/05", 103.4], ["04/06", 117.9], ["04/07", 133.1], ["04/08", 152.0], ["04/09", 144.9], ["04/10", 132.8], ["04/11", 129.4], ["04/12", 132.2], ["04/13", 146.8], ["04/14", 159.8], ["04/15", 143.2]];
   localStorage.setItem('dm_lw_trend_v1', JSON.stringify(lwTrendData));
+
+  // 买手 TOP5
+  localStorage.setItem('dm_buyers_v1', JSON.stringify([{"name": "董洁", "dgmv": 54.0}, {"name": "云朵的美味佳肴", "dgmv": 11.3}, {"name": "胡静", "dgmv": 10.3}, {"name": "李诞", "dgmv": 7.8}, {"name": "小贝饿了", "dgmv": 5.2}]));
+  // 店播 TOP5
+  localStorage.setItem('dm_d_sellers_v1', JSON.stringify([{"name": "一群娃的妈妈是潘潘海外专营店", "dgmv": 46.3}, {"name": "宫门口馒头铺旗舰店", "dgmv": 16.0}, {"name": "小黄象旗舰店", "dgmv": 11.2}, {"name": "小禾家零食分装的店", "dgmv": 11.0}, {"name": "paldo食品旗舰店", "dgmv": 11.0}]));
+  // 商家月销分层
+  localStorage.setItem('dm_tier_v1', JSON.stringify({"b5p": 1, "b4": 9, "b3": 16, "b2": 27, "b1": 5, "b0": 43, "inactive": 101}));
+  // 低动销商家
+  localStorage.setItem('dm_inactive_v1', JSON.stringify(["WINDEL旗舰店", "亿滋旗舰店", "甄甄优选的店", "田园猎手零食的店", "WHITELY TOMATO CUBE的店", "糙能农场儿童面专卖店", "只有一间手工烘焙的店", "瑞特滋RITTERSPORT旗舰店", "桂潮食品的店", "旺旺碎冰冰旗舰店"]));
+  // 品类突增突降
+  localStorage.setItem('dm_cate_v1', JSON.stringify([{"name": "饼干/膨化", "cur": 117.4, "prev": 89.7, "dir": "up"}, {"name": "液态奶/乳制品", "cur": 34.4, "prev": 20.7, "dir": "up"}, {"name": "熟食/卤味", "cur": 56.2, "prev": 41.4, "dir": "up"}, {"name": "粽子", "cur": 32.8, "prev": 27.6, "dir": "up"}, {"name": "方便粉丝/米线", "cur": 63.2, "prev": 72.6, "dir": "down"}, {"name": "巧克力", "cur": 152.2, "prev": 165.8, "dir": "down"}, {"name": "糖果零食", "cur": 32.9, "prev": 38.0, "dir": "down"}, {"name": "方便面/拉面", "cur": 79.5, "prev": 84.5, "dir": "down"}]));
+  // 品类×场域热力
+  localStorage.setItem('dm_heatmap_v1', JSON.stringify([{"cate": "零食/坚果", "k": 56.1, "d": 82.6, "n": 206.5}, {"cate": "粮油调味/速食", "k": 82.4, "d": 76.8, "n": 166.6}, {"cate": "水产/蔬果", "k": 0, "d": 0, "n": 88.1}, {"cate": "乳品/奶粉", "k": 0, "d": 22.4, "n": 34.4}, {"cate": "茶饮/饮料", "k": 0, "d": 0, "n": 8.0}]));
 }
 
 // 每次都强制 seed 最新数据（4/22 实时拉取，覆盖旧缓存）
