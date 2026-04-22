@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>大门业绩看板 2.0</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --red: #ff2442;
+      --red-light: #fff0f2;
+      --green: #00b578;
+      --green-light: #e6f9f1;
+      --blue: #3b82f6;
+      --blue-light: #eff6ff;
+      --orange: #f59e0b;
+      --orange-light: #fffbeb;
+      --purple: #8b5cf6;
+      --purple-light: #f5f3ff;
+      --gray: #6b7280;
+      --border: #e5e7eb;
+      --card-bg: #ffffff;
+      --page-bg: #f4f5f7;
+      --text: #111827;
+      --text-sub: #6b7280;
+      --text-label: #9ca3af;
+    }
+
+    body {
+      font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+      background: var(--page-bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ─── HEADER ─── */
+    .app-header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 20px 20px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-emoji { font-size: 28px; }
+    .header-title-group {}
+    .header-title { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
+    .header-sub { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+    .header-date-badge {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      padding: 6px 12px;
+      text-align: right;
+    }
+    .header-date-badge .date-main { font-size: 13px; font-weight: 700; color: #fff; }
+    .header-date-badge .date-sub { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 1px; }
+
+    /* ─── TAB NAV ─── */
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab-item {
+      flex-shrink: 0;
+      padding: 10px 16px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      border-bottom: 2.5px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .tab-item.active {
+      color: #fff;
+      border-bottom-color: #ff2442;
+    }
+    .tab-item .tab-icon { margin-right: 4px; }
+
+    /* ─── PAGE CONTAINER ─── */
+    .pages-wrapper { position: relative; }
+    .page {
+      display: none;
+      padding: 16px 16px 40px;
+      max-width: 800px;
+      margin: 0 auto;
+      animation: fadeSlide 0.25s ease;
+    }
+    .page.active { display: block; }
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── SECTION TITLE ─── */
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 20px 0 12px;
+    }
+    .section-title:first-child { margin-top: 0; }
+    .section-title .s-icon { font-size: 18px; }
+    .section-title .s-badge {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--purple);
+      background: var(--purple-light);
+      padding: 2px 7px;
+      border-radius: 20px;
+      margin-left: auto;
+    }
+
+    /* ─── CARD ─── */
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+    }
+    .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-label);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-title .ct-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ─── STAT ROW (big numbers) ─── */
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .stat-row.cols3 { grid-template-columns: repeat(3, 1fr); }
+    .stat-row.cols4 { grid-template-columns: repeat(4, 1fr); }
+    .stat-item {
+      background: var(--page-bg);
+      border-radius: 12px;
+      padding: 14px 12px;
+      position: relative;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-sub);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .stat-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+    }
+    .stat-value.big { font-size: 28px; }
+    .stat-value .unit { font-size: 13px; font-weight: 600; color: var(--text-sub); }
+    .stat-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 5px;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+    .stat-change.up { color: var(--red); background: var(--red-light); }
+    .stat-change.down { color: var(--green); background: var(--green-light); }
+    .stat-change.flat { color: var(--gray); background: #f3f4f6; }
+
+    /* ─── DIVIDER ─── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 14px 0;
+    }
+
+    /* ─── MINI BAR CHART ─── */
+    .mini-bar-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .mini-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mini-bar-label {
+      font-size: 12px;
+      color: var(--text-sub);
+      width: 56px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+    .mini-bar-track {
+      flex: 1;
+      height: 8px;
+      background: var(--page-bg);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .mini-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.6s ease;
+    }
+    .mini-bar-val {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      width: 52px;
+      flex-shrink: 0;
+    }
+    .mini-bar-change {
+      font-size: 11px;
+      font-weight: 600;
+      width: 48px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+    .mini-bar-change.up { color: var(--red); }
+    .mini-bar-change.down { color: var(--green); }
+
+    /* ─── ANOMALY CARD ─── */
+    .anomaly-list { display: flex; flex-direction: column; gap: 8px; }
+    .anomaly-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--page-bg);
+    }
+    .anomaly-rank {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .anomaly-rank.surge { background: #fff0f2; color: var(--red); }
+    .anomaly-rank.drop  { background: var(--green-light); color: var(--green); }
+    .anomaly-main { flex: 1; min-width: 0; }
+    .anomaly-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .anomaly-meta { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+    .anomaly-right { text-align: right; flex-shrink: 0; }
+    .anomaly-delta {
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .anomaly-delta.up { color: var(--red); }
+    .anomaly-delta.down { color: var(--green); }
+    .anomaly-pct {
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .anomaly-pct.up { color: var(--red); }
+    .anomaly-pct.down { color: var(--green); }
+
+    /* ─── TABLE ─── */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .data-table th {
+      text-align: left;
+      padding: 0 8px 10px;
+      color: var(--text-label);
+      font-weight: 600;
+      font-size: 11px;
+      border-bottom: 1px solid var(--border);
+    }
+    .data-table th:first-child { padding-left: 0; }
+    .data-table th:last-child { text-align: right; }
+    .data-table td {
+      padding: 9px 8px;
+      vertical-align: middle;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .data-table td:first-child { padding-left: 0; }
+    .data-table td:last-child { text-align: right; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .td-name { font-weight: 600; color: var(--text); }
+    .td-sub { font-size: 10px; color: var(--text-sub); margin-top: 1px; }
+
+    /* ─── PROGRESS BAR (场域占比) ─── */
+    .stacked-bar-wrap { margin: 4px 0 8px; }
+    .stacked-bar {
+      display: flex;
+      height: 10px;
+      border-radius: 99px;
+      overflow: hidden;
+      gap: 2px;
+    }
+    .stacked-bar-seg { transition: flex 0.5s ease; }
+    .stacked-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      margin-top: 10px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--text-sub);
+    }
+    .legend-dot {
+      width: 8px; height: 8px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .legend-val { font-weight: 700; color: var(--text); }
+
+    /* ─── TREND SPARKLINE (SVG) ─── */
+    .sparkline-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .sparkline-chart { flex: 1; }
+    .sparkline-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-label);
+      margin-top: 4px;
+    }
+
+    /* ─── PILL TAG ─── */
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .pill-k   { background: #fff0f2; color: var(--red); }
+    .pill-d   { background: #eff6ff; color: var(--blue); }
+    .pill-n   { background: #ecfdf5; color: var(--green); }
+    .pill-c   { background: #fffbeb; color: var(--orange); }
+
+    /* ─── WARNING BADGE ─── */
+    .warn-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #92400e;
+      background: #fef3c7;
+      padding: 3px 8px;
+      border-radius: 8px;
+    }
+
+    /* ─── EMPTY STATE ─── */
+    .empty-hint {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--text-sub);
+      font-size: 13px;
+    }
+    .empty-hint .e-icon { font-size: 32px; margin-bottom: 8px; }
+
+    /* ─── DATA SOURCE FOOTER ─── */
+    .data-source-note {
+      font-size: 10px;
+      color: var(--text-label);
+      text-align: center;
+      margin-top: 8px;
+      padding: 0 8px;
+    }
+
+    /* ─── UPDATE HINT ─── */
+    .update-bar {
+      background: #1e293b;
+      color: rgba(255,255,255,0.6);
+      text-align: center;
+      font-size: 11px;
+      padding: 6px 16px;
+    }
+    .update-bar span { color: rgba(255,255,255,0.9); font-weight: 600; }
+
+    /* ─── RESPONSIVE: desktop widens cards ─── */
+    @media (min-width: 640px) {
+      .stat-row.cols4 { grid-template-columns: repeat(4, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .stat-row.cols3 { grid-template-columns: repeat(3, 1fr); }
+      .stat-value { font-size: 18px; }
+      .stat-value.big { font-size: 22px; }
+    }
+
+    /* ─── INLINE TWO-COL ─── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 400px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ─── ALERT STRIP ─── */
+    .alert-strip {
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .alert-strip.warn { background: #fffbeb; border-left: 3px solid var(--orange); }
+    .alert-strip.info { background: #eff6ff; border-left: 3px solid var(--blue); }
+    .alert-strip .alert-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+    .alert-strip .alert-text { color: var(--text); line-height: 1.5; }
+    .alert-strip .alert-text strong { color: var(--text); }
+
+    /* ─── LAST UPDATED TAG ─── */
+    .last-updated {
+      font-size: 10px;
+      color: var(--text-label);
+      margin-top: 4px;
+    }
+
+    /* ─── HORIZONTAL SCROLL TABLE WRAPPER ─── */
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .table-scroll .data-table { min-width: 520px; }
+
+    /* ─── ICON CIRCLE ─── */
+    .icon-circle {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    /* ─── METRIC DELTA ROW ─── */
+    .metric-delta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .metric-delta-row:last-child { border-bottom: none; }
+    .mdr-left { display: flex; align-items: center; gap: 10px; }
+    .mdr-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .mdr-sub { font-size: 10px; color: var(--text-sub); margin-top: 2px; }
+    .mdr-right { text-align: right; }
+    .mdr-val { font-size: 15px; font-weight: 800; color: var(--text); }
+    .mdr-delta { font-size: 11px; font-weight: 600; margin-top: 2px; }
+    .mdr-delta.up { color: var(--red); }
+    .mdr-delta.down { color: var(--green); }
+    .mdr-delta.flat { color: var(--gray); }
+
+    /* ─── TOOLTIP HINT ─── */
+    .tip { cursor: help; border-bottom: 1px dashed var(--text-label); }
+
+    /* ─── DATA FILL BUTTON (for static demo) ─── */
+    .fill-hint {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    /* ─── NOTICE PANEL ─── */
+    .notice-panel {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+    .notice-panel h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .notice-panel p { font-size: 12px; color: rgba(255,255,255,0.65); line-height: 1.6; }
+    .notice-panel .nt-steps {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .notice-panel .nt-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.8);
+    }
+    .notice-panel .nt-num {
+      width: 18px; height: 18px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<header class="app-header">
+  <div class="header-top">
+    <div class="header-brand">
+      <span class="header-emoji">🦞</span>
+      <div class="header-title-group">
+        <div class="header-title">大门业绩看板 2.0</div>
+        <div class="header-sub">休食行业 · 五组 · 个人 AM 看板</div>
+      </div>
+    </div>
+    <div class="header-date-badge">
+      <div class="date-main" id="hdr-date">--</div>
+      <div class="date-sub" id="hdr-day">加载中…</div>
+    </div>
+  </div>
+  <nav class="tab-nav">
+    <div class="tab-item active" data-tab="today" onclick="switchTab('today')">
+      <span class="tab-icon">🔴</span>今日实时
+    </div>
+    <div class="tab-item" data-tab="trend" onclick="switchTab('trend')">
+      <span class="tab-icon">📈</span>趋势&异动
+    </div>
+    <div class="tab-item" data-tab="seller" onclick="switchTab('seller')">
+      <span class="tab-icon">🏪</span>商家健康
+    </div>
+    <div class="tab-item" data-tab="channel" onclick="switchTab('channel')">
+      <span class="tab-icon">🎯</span>场域分析
+    </div>
+    <div class="tab-item" data-tab="goods" onclick="switchTab('goods')">
+      <span class="tab-icon">📦</span>货盘洞察
+    </div>
+  </nav>
+</header>
+
+<div class="update-bar" id="update-bar">
+  数据状态：<span id="data-freshness">请手动填入最新数据 ↓</span>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 1：今日实时
+═══════════════════════════════════════════ -->
+<div class="page active" id="page-today">
+
+  <!-- 今日核心指标 -->
+  <div class="section-title">
+    <span class="s-icon">⚡</span>今日核心指标
+    <span class="s-badge">实时</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="ct-dot" style="background:var(--red)"></span>
+      今日累计 DGMV
+    </div>
+    <div class="stat-row">
+      <div class="stat-item" style="grid-column: span 2; background: linear-gradient(135deg,#fff0f2,#fff);">
+        <div class="stat-label">今日累计成交额</div>
+        <div class="stat-value big"><span id="t-dgmv-val">—</span><span class="unit"> 万</span></div>
+        <div style="display:flex; gap:8px; margin-top:6px; flex-wrap:wrap;">
+          <span class="stat-change" id="t-dgmv-dod-pct">环比昨日 —</span>
+          <span class="stat-change flat" id="t-dgmv-target-pct">目标进度 —</span>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="stat-row cols3">
+      <div class="stat-item">
+        <div class="stat-label">昨日同期</div>
+        <div class="stat-value"><span id="t-dgmv-yd">—</span><span class="unit">万</span></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">上周同期</div>
+        <div class="stat-value"><span id="t-dgmv-lw">—</span><span class="unit">万</span></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">月累计 MTD</div>
+        <div class="stat-value"><span id="t-dgmv-mtd">—</span><span class="unit">万</span></div>
+      </div>
+    </div>
+    <div class="last-updated">💡 数据截至当日最后更新时点，手动同步</div>
+  </div>
+
+  <!-- 今日 DAB + 客单价 -->
+  <div class="card">
+    <div class="card-title">
+      <span class="ct-dot" style="background:var(--blue)"></span>
+      今日下单用户 & 客单
+    </div>
+    <div class="stat-row">
+      <div class="stat-item">
+        <div class="stat-label">今日 DAB（下单人数）</div>
+        <div class="stat-value"><span id="t-dab-val">—</span></div>
+        <span class="stat-change" id="t-dab-change">vs 昨日 —</span>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">今日客单价</div>
+        <div class="stat-value"><span id="t-atv-val">—</span><span class="unit">元</span></div>
+        <span class="stat-change" id="t-atv-change">vs 昨日 —</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 今日分场域 -->
+  <div class="section-title">
+    <span class="s-icon">🎯</span>今日分场域表现
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="ct-dot" style="background:var(--purple)"></span>
+      K播 / 店播 / 商笔 今日 vs 昨日
+    </div>
+    <div class="mini-bar-wrap" id="today-channel-bars">
+      <!-- JS 填充 -->
+      <div class="metric-delta-row">
+        <div class="mdr-left">
+          <div class="icon-circle" style="background:#fff0f2;">📹</div>
+          <div>
+            <div class="mdr-name">K播</div>
+            <div class="mdr-sub">买手直播成交</div>
+          </div>
+        </div>
+        <div class="mdr-right">
+          <div class="mdr-val"><span id="t-k-val">—</span><span style="font-size:11px;color:var(--text-sub)"> 万</span></div>
+          <div class="mdr-delta" id="t-k-delta">—</div>
+        </div>
+      </div>
+      <div class="metric-delta-row">
+        <div class="mdr-left">
+          <div class="icon-circle" style="background:#eff6ff;">🏪</div>
+          <div>
+            <div class="mdr-name">店播</div>
+            <div class="mdr-sub">商家自播成交</div>
+          </div>
+        </div>
+        <div class="mdr-right">
+          <div class="mdr-val"><span id="t-d-val">—</span><span style="font-size:11px;color:var(--text-sub)"> 万</span></div>
+          <div class="mdr-delta" id="t-d-delta">—</div>
+        </div>
+      </div>
+      <div class="metric-delta-row">
+        <div class="mdr-left">
+          <div class="icon-circle" style="background:#ecfdf5;">📝</div>
+          <div>
+            <div class="mdr-name">商品笔记</div>
+            <div class="mdr-sub">笔记挂链成交</div>
+          </div>
+        </div>
+        <div class="mdr-right">
+          <div class="mdr-val"><span id="t-n-val">—</span><span style="font-size:11px;color:var(--text-sub)"> 万</span></div>
+          <div class="mdr-delta" id="t-n-delta">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 数据录入入口 -->
+  <div class="card" style="border: 1.5px dashed #cbd5e1;">
+    <div class="card-title">
+      <span class="ct-dot" style="background:var(--gray)"></span>
+      数据录入（手动同步）
+    </div>
+    <div class="alert-strip info">
+      <span class="alert-icon">ℹ️</span>
+      <span class="alert-text">从 RedBI 看板获取数据后，<strong>在下方填入数值</strong>，看板自动计算环比并刷新所有图表。数据保存在本地浏览器。</span>
+    </div>
+    <button class="fill-hint" onclick="openDataEntry()">
+      ✏️ 打开数据录入面板
+    </button>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 2：趋势 & 异动
+═══════════════════════════════════════════ -->
+<div class="page" id="page-trend">
+
+  <!-- 近14天趋势 -->
+  <div class="section-title">
+    <span class="s-icon">📈</span>近14天 DGMV 趋势
+    <span class="s-badge">日粒度</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="ct-dot" style="background:var(--red)"></span>
+      DGMV 走势 vs 上周同期
+    </div>
+    <!-- SVG Sparkline -->
+    <svg id="trend-svg" viewBox="0 0 340 100" width="100%" style="overflow:visible;display:block;">
+      <defs>
+        <linearGradient id="grad-main" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ff2442" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#ff2442" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="grad-last" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#94a3b8" stop-opacity="0.1"/>
+          <stop offset="100%" stop-color="#94a3b8" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <!-- Grid lines -->
+      <line x1="0" y1="80" x2="340" y2="80" stroke="#f3f4f6" stroke-width="1"/>
+      <line x1="0" y1="50" x2="340" y2="50" stroke="#f3f4f6" stroke-width="1"/>
+      <line x1="0" y1="20" x2="340" y2="20" stroke="#f3f4f6" stroke-width="1"/>
+      <!-- Filled area last week -->
+      <path id="svg-area-lw" fill="url(#grad-last)" d=""/>
+      <!-- Filled area this week -->
+      <path id="svg-area-tw" fill="url(#grad-main)" d=""/>
+      <!-- Lines -->
+      <polyline id="svg-line-lw" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 3" points=""/>
+      <polyline id="svg-line-tw" fill="none" stroke="#ff2442" stroke-width="2" points=""/>
+      <!-- Dots placeholder -->
+      <g id="svg-dots"></g>
+    </svg>
+    <div class="sparkline-labels" id="trend-labels">
+      <!-- JS 填充日期标签 -->
+    </div>
+    <div class="stacked-legend" style="margin-top:12px;">
+      <div class="legend-item"><div class="legend-dot" style="background:#ff2442"></div>本期</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#cbd5e1; border: 1px dashed #94a3b8;"></div>上周同期</div>
+    </div>
+    <div class="data-source-note">数据手动录入 · 每日人货场成交分析</div>
+  </div>
+
+  <!-- 分场域近7天对比 -->
+  <div class="section-title">
+    <span class="s-icon">🎯</span>分场域近7天对比
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="ct-dot" style="background:var(--purple)"></span>
+      K播 / 店播 / 商笔 日均 DGMV（近7日 vs 上个7日）
+    </div>
+    <div id="channel-compare-wrap">
+      <div class="mini-bar-wrap" id="channel-7d-bars">
+        <!-- JS 填充 -->
+        <div style="text-align:center; padding:20px; color:var(--text-label); font-size:12px;">请先录入数据</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="section-title" style="margin:0 0 10px; font-size:13px;">场域占比结构</div>
+    <div class="stacked-bar-wrap">
+      <div class="stacked-bar" id="channel-stack">
+        <div class="stacked-bar-seg" id="seg-k" style="background:#ff2442; flex:33"></div>
+        <div class="stacked-bar-seg" id="seg-d" style="background:#3b82f6; flex:33"></div>
+        <div class="stacked-bar-seg" id="seg-n" style="background:#00b578; flex:34"></div>
+      </div>
+      <div class="stacked-legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#ff2442"></div>
+          K播 <span class="legend-val" id="leg-k">—%</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#3b82f6"></div>
+          店播 <span class="legend-val" id="leg-d">—%</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#00b578"></div>
+          商笔 <span class="legend-val" id="leg-n">—%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 突增突降 -->
+  <div class="section-title">
+    <span class="s-icon">⚠️</span>突增突降商家预警
+    <span class="s-badge">近3天环比</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="ct-dot" style="background:var(--red)"></span>
+      突增 Top5（绝对额 & 环比%）
+    </div>
+    <div class="anomaly-list" id="surge-list">
+      <!-- JS 填充 or 手动 -->
+      <div class="empty-hint" style="padding:16px 0;">
+        <div>📊 请录入商家近3天数据后查看</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="ct-dot" style="background:var(--green)"></span>
+      突降 Top5（绝对额 & 环比%）
+    </div>
+    <div class="anomaly-list" id="drop-list">
+      <div class="empty-hint" style="padding:16px 0;">
+        <div>📊 请录入商家近3天数据后查看</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 品类突增突降 -->
+  <div class="section-title">
+    <span class="s-icon">🗂️</span>突增突降品类预警
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">
+        <span class="ct-dot" style="background:var(--red)"></span>突增品类
+      </div>
+      <div id="cate-surge-list">
+        <div class="empty-hint" style="padding:12px 0; font-size:12px;">录入数据后显示</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <span class="ct-dot" style="background:var(--green)"></span>突降品类
+      </div>
+      <div id="cate-drop-list">
+        <div class="empty-hint" style="padding:12px 0; font-size:12px;">录入数据后显示</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 3：商家健康
+═══════════════════════════════════════════ -->
+<div class="page" id="page-seller">
+
+  <!-- 概览 -->
+  <div class="section-title">
+    <span class="s-icon">📊</span>商家池概览
+  </div>
+
+  <div class="card">
+    <div class="stat-row cols3">
+      <div class="stat-item">
+        <div class="stat-label">挂接商家总数</div>
+        <div class="stat-value"><span id="s-total">309</span></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">近7天动销</div>
+        <div class="stat-value"><span id="s-active">—</span></div>
+        <span class="stat-change flat" id="s-active-pct">动销率 —</span>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">未动销商家</div>
+        <div class="stat-value"><span id="s-inactive">—</span></div>
+        <span class="warn-badge" id="s-warn-badge" style="display:none">⚠️ 需关注</span>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="stat-row">
+      <div class="stat-item">
+        <div class="stat-label">K播动销商家</div>
+        <div class="stat-value"><span id="s-k-active">—</span></div>
+        <span class="stat-change flat" id="s-k-pct">—</span>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">店播动销商家</div>
+        <div class="stat-value"><span id="s-d-active">—</span></div>
+        <span class="stat-change flat" id="s-d-pct">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 商家 DGMV 排行 -->
+  <div class="section-title">
+    <span class="s-icon">🏆</span>商家 DGMV Top15
+    <span class="s-badge">近7天</span>
+  </div>
+
+  <div class="card">
+    <div class="alert-strip info">
+      <span class="alert-icon">💡</span>
+      <span class="alert-text">点击商家名可展开场域结构。数据来源：人货场成交分析 (id:1922)，按 AM 筛选后导出。</span>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table" id="seller-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>商家</th>
+            <th>DGMV(万)</th>
+            <th>环比</th>
+            <th>主场域</th>
+          </tr>
+        </thead>
+        <tbody id="seller-tbody">
+          <tr>
+            <td colspan="5">
+              <div class="empty-hint">
+                <div class="e-icon">🏪</div>
+                <div>录入商家数据后显示排行榜</div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 月销分层 -->
+  <div class="section-title">
+    <span class="s-icon">📉</span>商家月销分层分布
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="ct-dot" style="background:var(--blue)"></span>
+      B 分层商家数（B0~B6）
+    </div>
+    <div class="mini-bar-wrap" id="b-level-bars">
+      <!-- JS 填充 -->
+      <div style="text-align:center; padding:12px; color:var(--text-label); font-size:12px;">录入数据后显示</div>
+    </div>
+    <div class="data-source-note">B6=月销最高档，B0=未动销或极低</div>
+  </div>
+
+  <!-- 低动销预警 -->
+  <div class="section-title">
+    <span class="s-icon">🚨</span>低动销预警
+  </div>
+
+  <div class="card" id="inactive-card">
+    <div class="card-title">
+      <span class="ct-dot" style="background:var(--orange)"></span>
+      近7天未动销商家（挂接但 DGMV=0）
+    </div>
+    <div id="inactive-list">
+      <div class="empty-hint" style="padding:12px 0; font-size:12px;">录入数据后显示</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 4：场域分析
+═══════════════════════════════════════════ -->
+<div class="page" id="page-channel">
+
+  <!-- 场域 DGMV 占比 -->
+  <div class="section-title">
+    <span class="s-icon">🥧</span>场域 DGMV 结构
+    <span class="s-badge">近7天</span>
+  </div>
+
+  <div class="card">
+    <div class="stacked-bar-wrap">
+      <div class="stacked-bar" id="ch-stack-bar">
+        <div class="stacked-bar-seg" style="background:#ff2442; flex:33"></div>
+        <div class="stacked-bar-seg" style="background:#3b82f6; flex:34"></div>
+        <div class="stacked-bar-seg" style="background:#00b578; flex:33"></div>
+      </div>
+      <div class="stacked-legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#ff2442"></div>
+          K播 <span class="legend-val" id="ch-k-pct">—%</span>
+          <span style="font-size:10px;color:var(--text-sub)">(<span id="ch-k-abs">—</span>万)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#3b82f6"></div>
+          店播 <span class="legend-val" id="ch-d-pct">—%</span>
+          <span style="font-size:10px;color:var(--text-sub)">(<span id="ch-d-abs">—</span>万)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#00b578"></div>
+          商笔 <span class="legend-val" id="ch-n-pct">—%</span>
+          <span style="font-size:10px;color:var(--text-sub)">(<span id="ch-n-abs">—</span>万)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- K播详情 -->
+  <div class="section-title">
+    <span class="s-icon">📹</span>K播详情
+  </div>
+
+  <div class="card">
+    <div class="stat-row">
+      <div class="stat-item">
+        <div class="stat-label">K播 DGMV（近7天）</div>
+        <div class="stat-value"><span id="k-dgmv">—</span><span class="unit">万</span></div>
+        <span class="stat-change" id="k-dgmv-chg">环比 —</span>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">K播动销商家</div>
+        <div class="stat-value"><span id="k-sellers">—</span><span class="unit">家</span></div>
+        <span class="stat-change" id="k-sellers-chg">环比 —</span>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="stat-row">
+      <div class="stat-item">
+        <div class="stat-label">平均单坑产出</div>
+        <div class="stat-value"><span id="k-pit">—</span><span class="unit">万</span></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">K播成交占比</div>
+        <div class="stat-value"><span id="k-share">—</span><span class="unit">%</span></div>
+        <span class="stat-change flat" id="k-share-chg">vs 上期 —</span>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="card-title" style="margin-bottom:10px;">
+      <span class="ct-dot" style="background:var(--red)"></span>
+      主力买手 Top5（近7天 K播 DGMV）
+    </div>
+    <div id="k-buyer-list">
+      <div class="empty-hint" style="padding:10px 0; font-size:12px;">录入数据后显示</div>
+    </div>
+  </div>
+
+  <!-- 店播详情 -->
+  <div class="section-title">
+    <span class="s-icon">🏪</span>店播详情
+  </div>
+
+  <div class="card">
+    <div class="stat-row">
+      <div class="stat-item">
+        <div class="stat-label">店播 DGMV（近7天）</div>
+        <div class="stat-value"><span id="d-dgmv">—</span><span class="unit">万</span></div>
+        <span class="stat-change" id="d-dgmv-chg">环比 —</span>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">店播动销商家</div>
+        <div class="stat-value"><span id="d-sellers">—</span><span class="unit">家</span></div>
+        <span class="stat-change" id="d-sellers-chg">环比 —</span>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="card-title" style="margin-bottom:10px;">
+      <span class="ct-dot" style="background:var(--blue)"></span>
+      近7天最活跃店播商家 Top5
+    </div>
+    <div id="d-seller-list">
+      <div class="empty-hint" style="padding:10px 0; font-size:12px;">录入数据后显示</div>
+    </div>
+  </div>
+
+  <!-- 商笔详情 -->
+  <div class="section-title">
+    <span class="s-icon">📝</span>商品笔记详情
+  </div>
+
+  <div class="card">
+    <div class="stat-row">
+      <div class="stat-item">
+        <div class="stat-label">商笔 DGMV（近7天）</div>
+        <div class="stat-value"><span id="n-dgmv">—</span><span class="unit">万</span></div>
+        <span class="stat-change" id="n-dgmv-chg">环比 —</span>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">商笔动销商家</div>
+        <div class="stat-value"><span id="n-sellers">—</span><span class="unit">家</span></div>
+        <span class="stat-change" id="n-sellers-chg">环比 —</span>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="stat-row">
+      <div class="stat-item">
+        <div class="stat-label">商笔件单价</div>
+        <div class="stat-value"><span id="n-price">—</span><span class="unit">元</span></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">商笔占比</div>
+        <div class="stat-value"><span id="n-share">—</span><span class="unit">%</span></div>
+        <span class="stat-change flat" id="n-share-chg">vs 上期 —</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 5：货盘洞察
+═══════════════════════════════════════════ -->
+<div class="page" id="page-goods">
+
+  <!-- Top SPU -->
+  <div class="section-title">
+    <span class="s-icon">🔥</span>近7天爆品 Top15
+    <span class="s-badge">SPU 维度</span>
+  </div>
+
+  <div class="card">
+    <div class="alert-strip info">
+      <span class="alert-icon">💡</span>
+      <span class="alert-text">从人货场成交分析导出，按商品 SPU 维度聚合近7天 DGMV。</span>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table" id="goods-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>商品名</th>
+            <th>DGMV(万)</th>
+            <th>场域</th>
+          </tr>
+        </thead>
+        <tbody id="goods-tbody">
+          <tr>
+            <td colspan="4">
+              <div class="empty-hint">
+                <div class="e-icon">📦</div>
+                <div>录入数据后显示爆品排行</div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 价格带 -->
+  <div class="section-title">
+    <span class="s-icon">💰</span>价格带 DGMV 分布
+  </div>
+
+  <div class="card">
+    <div class="mini-bar-wrap" id="price-band-bars">
+      <div style="text-align:center; padding:12px; color:var(--text-label); font-size:12px;">录入数据后显示</div>
+    </div>
+  </div>
+
+  <!-- 品类 × 场域 热力矩阵 -->
+  <div class="section-title">
+    <span class="s-icon">🗺️</span>品类 × 场域 热力
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="ct-dot" style="background:var(--purple)"></span>
+      各品类在三场域的 DGMV 分布（近7天，万元）
+    </div>
+    <div class="table-scroll">
+      <table class="data-table" id="heatmap-table">
+        <thead>
+          <tr>
+            <th>品类</th>
+            <th style="color:var(--red)">K播</th>
+            <th style="color:var(--blue)">店播</th>
+            <th style="color:var(--green)">商笔</th>
+            <th>合计</th>
+          </tr>
+        </thead>
+        <tbody id="heatmap-tbody">
+          <tr>
+            <td colspan="5">
+              <div class="empty-hint" style="padding:12px 0; font-size:12px;">录入数据后显示</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="data-source-note">品类 = 商品运营行业 · 近7天 · 大门 AM 商家池</div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════
+     DATA ENTRY MODAL
+═══════════════════════════════════════════ -->
+<div id="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:200; overflow-y:auto; padding:20px 16px 40px;">
+  <div style="max-width:600px; margin:0 auto; background:#fff; border-radius:20px; overflow:hidden;">
+    <div style="background: linear-gradient(135deg,#1a1a2e,#0f3460); padding:18px 20px; display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div style="color:#fff; font-size:16px; font-weight:800;">✏️ 数据录入</div>
+        <div style="color:rgba(255,255,255,0.55); font-size:11px; margin-top:3px;">从 RedBI 复制数据后填入以下字段</div>
+      </div>
+      <button onclick="closeModal()" style="background:rgba(255,255,255,0.1); border:none; color:#fff; font-size:20px; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;">×</button>
+    </div>
+
+    <div style="padding:20px; display:flex; flex-direction:column; gap:20px;">
+
+      <!-- Section: 今日实时 -->
+      <div>
+        <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+          🔴 今日实时数据
+          <span style="font-size:10px; color:var(--text-sub); font-weight:400;">（实时订单看板获取）</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div><label class="input-label">今日累计 DGMV（万）</label><input class="data-input" id="inp-today-dgmv" type="number" placeholder="如 42.5"></div>
+          <div><label class="input-label">昨日同期 DGMV（万）</label><input class="data-input" id="inp-yd-dgmv" type="number" placeholder="如 38.2"></div>
+          <div><label class="input-label">上周同期 DGMV（万）</label><input class="data-input" id="inp-lw-dgmv" type="number" placeholder="如 40.0"></div>
+          <div><label class="input-label">月累计 MTD（万）</label><input class="data-input" id="inp-mtd-dgmv" type="number" placeholder="如 520"></div>
+          <div><label class="input-label">今日 DAB（下单人数）</label><input class="data-input" id="inp-today-dab" type="number" placeholder="如 1280"></div>
+          <div><label class="input-label">昨日 DAB</label><input class="data-input" id="inp-yd-dab" type="number" placeholder="如 1150"></div>
+          <div><label class="input-label">今日客单价（元）</label><input class="data-input" id="inp-today-atv" type="number" placeholder="如 132"></div>
+          <div><label class="input-label">昨日客单价（元）</label><input class="data-input" id="inp-yd-atv" type="number" placeholder="如 125"></div>
+        </div>
+        <div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+          <div><label class="input-label">今日 K播（万）</label><input class="data-input" id="inp-today-k" type="number" placeholder="0"></div>
+          <div><label class="input-label">今日 店播（万）</label><input class="data-input" id="inp-today-d" type="number" placeholder="0"></div>
+          <div><label class="input-label">今日 商笔（万）</label><input class="data-input" id="inp-today-n" type="number" placeholder="0"></div>
+          <div><label class="input-label">昨日 K播（万）</label><input class="data-input" id="inp-yd-k" type="number" placeholder="0"></div>
+          <div><label class="input-label">昨日 店播（万）</label><input class="data-input" id="inp-yd-d" type="number" placeholder="0"></div>
+          <div><label class="input-label">昨日 商笔（万）</label><input class="data-input" id="inp-yd-n" type="number" placeholder="0"></div>
+        </div>
+      </div>
+
+      <div style="height:1px; background:var(--border);"></div>
+
+      <!-- Section: 近7天汇总 -->
+      <div>
+        <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:12px;">
+          📊 近7天 vs 上个7天（汇总）
+          <span style="font-size:10px; color:var(--text-sub); font-weight:400; display:block; margin-top:2px;">从人货场成交分析，按场域筛选并汇总</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+          <div><label class="input-label">近7天 K播（万）</label><input class="data-input" id="inp-7d-k" type="number" placeholder="0"></div>
+          <div><label class="input-label">近7天 店播（万）</label><input class="data-input" id="inp-7d-d" type="number" placeholder="0"></div>
+          <div><label class="input-label">近7天 商笔（万）</label><input class="data-input" id="inp-7d-n" type="number" placeholder="0"></div>
+          <div><label class="input-label">上个7天 K播（万）</label><input class="data-input" id="inp-p7d-k" type="number" placeholder="0"></div>
+          <div><label class="input-label">上个7天 店播（万）</label><input class="data-input" id="inp-p7d-d" type="number" placeholder="0"></div>
+          <div><label class="input-label">上个7天 商笔（万）</label><input class="data-input" id="inp-p7d-n" type="number" placeholder="0"></div>
+        </div>
+        <div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div><label class="input-label">近7天动销商家（K播）</label><input class="data-input" id="inp-7d-k-sellers" type="number" placeholder="0"></div>
+          <div><label class="input-label">近7天动销商家（店播）</label><input class="data-input" id="inp-7d-d-sellers" type="number" placeholder="0"></div>
+          <div><label class="input-label">近7天总动销商家</label><input class="data-input" id="inp-7d-active-sellers" type="number" placeholder="0"></div>
+          <div><label class="input-label">近7天 K播单坑产出（万）</label><input class="data-input" id="inp-7d-k-pit" type="number" placeholder="0"></div>
+          <div><label class="input-label">商笔件单价（元）</label><input class="data-input" id="inp-7d-n-price" type="number" placeholder="0"></div>
+        </div>
+      </div>
+
+      <div style="height:1px; background:var(--border);"></div>
+
+      <!-- Section: 突增突降商家 (JSON) -->
+      <div>
+        <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:6px;">⚠️ 突增突降商家数据</div>
+        <div style="font-size:11px; color:var(--text-sub); margin-bottom:10px; line-height:1.6;">
+          格式：JSON 数组，每项包含 name（商家名）、channel（场域：K播/店播/商笔）、cur（近3天均值，万）、prev（前3天均值，万）<br>
+          <code style="font-size:10px; background:#f3f4f6; padding:2px 6px; border-radius:4px;">[{"name":"商家A","channel":"K播","cur":12.5,"prev":8.2},...]</code>
+        </div>
+        <textarea id="inp-anomaly-json" style="width:100%; height:100px; font-size:11px; font-family:monospace; border:1.5px solid var(--border); border-radius:10px; padding:10px; resize:vertical; outline:none; color:var(--text);" placeholder='[{"name":"商家A","channel":"K播","cur":12.5,"prev":8.2}]'></textarea>
+      </div>
+
+      <div style="height:1px; background:var(--border);"></div>
+
+      <!-- Section: 品类突增突降 -->
+      <div>
+        <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:6px;">🗂️ 品类突增突降数据</div>
+        <div style="font-size:11px; color:var(--text-sub); margin-bottom:10px;">
+          格式同上，name = 品类名<br>
+          <code style="font-size:10px; background:#f3f4f6; padding:2px 6px; border-radius:4px;">[{"name":"零食坚果","channel":"K播","cur":80,"prev":55}]</code>
+        </div>
+        <textarea id="inp-cate-json" style="width:100%; height:80px; font-size:11px; font-family:monospace; border:1.5px solid var(--border); border-radius:10px; padding:10px; resize:vertical; outline:none; color:var(--text);" placeholder='[{"name":"零食坚果","channel":"K播","cur":80,"prev":55}]'></textarea>
+      </div>
+
+      <div style="height:1px; background:var(--border);"></div>
+
+      <!-- Section: 商家排行 -->
+      <div>
+        <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:6px;">🏆 商家 DGMV 排行</div>
+        <div style="font-size:11px; color:var(--text-sub); margin-bottom:10px;">
+          格式：每项含 name、dgmv（万）、prev（上期万）、channel（主场域）<br>
+          <code style="font-size:10px; background:#f3f4f6; padding:2px 6px; border-radius:4px;">[{"name":"商家X","dgmv":45.2,"prev":40.1,"channel":"K播"}]</code>
+        </div>
+        <textarea id="inp-seller-json" style="width:100%; height:100px; font-size:11px; font-family:monospace; border:1.5px solid var(--border); border-radius:10px; padding:10px; resize:vertical; outline:none; color:var(--text);" placeholder='[{"name":"商家X","dgmv":45.2,"prev":40.1,"channel":"K播"}]'></textarea>
+      </div>
+
+      <div style="height:1px; background:var(--border);"></div>
+
+      <!-- Section: 爆品排行 -->
+      <div>
+        <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:6px;">📦 爆品 SPU 排行</div>
+        <div style="font-size:11px; color:var(--text-sub); margin-bottom:10px;">
+          格式：每项含 name（商品名）、dgmv（万）、channel（场域）<br>
+          <code style="font-size:10px; background:#f3f4f6; padding:2px 6px; border-radius:4px;">[{"name":"好利来月饼礼盒","dgmv":18.5,"channel":"K播"}]</code>
+        </div>
+        <textarea id="inp-goods-json" style="width:100%; height:80px; font-size:11px; font-family:monospace; border:1.5px solid var(--border); border-radius:10px; padding:10px; resize:vertical; outline:none; color:var(--text);" placeholder='[{"name":"好利来月饼礼盒","dgmv":18.5,"channel":"K播"}]'></textarea>
+      </div>
+
+      <div style="height:1px; background:var(--border);"></div>
+
+      <!-- Section: 价格带 -->
+      <div>
+        <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:6px;">💰 价格带分布</div>
+        <div style="font-size:11px; color:var(--text-sub); margin-bottom:10px;">
+          格式：每项含 label（价格段）、dgmv（万）<br>
+          <code style="font-size:10px; background:#f3f4f6; padding:2px 6px; border-radius:4px;">[{"label":"0-50元","dgmv":120},{"label":"50-200元","dgmv":280}]</code>
+        </div>
+        <textarea id="inp-price-json" style="width:100%; height:60px; font-size:11px; font-family:monospace; border:1.5px solid var(--border); border-radius:10px; padding:10px; resize:vertical; outline:none; color:var(--text);" placeholder='[{"label":"0-50元","dgmv":120}]'></textarea>
+      </div>
+
+      <div style="height:1px; background:var(--border);"></div>
+
+      <!-- Section: 品类×场域 热力 -->
+      <div>
+        <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:6px;">🗺️ 品类×场域热力数据</div>
+        <div style="font-size:11px; color:var(--text-sub); margin-bottom:10px;">
+          格式：每项含 cate（品类）、k、d、n（各场域万元）<br>
+          <code style="font-size:10px; background:#f3f4f6; padding:2px 6px; border-radius:4px;">[{"cate":"零食坚果","k":80,"d":45,"n":30}]</code>
+        </div>
+        <textarea id="inp-heatmap-json" style="width:100%; height:80px; font-size:11px; font-family:monospace; border:1.5px solid var(--border); border-radius:10px; padding:10px; resize:vertical; outline:none; color:var(--text);" placeholder='[{"cate":"零食坚果","k":80,"d":45,"n":30}]'></textarea>
+      </div>
+
+      <!-- Save button -->
+      <button onclick="saveData()" style="background: linear-gradient(135deg,#ff2442,#ff6b6b); color:#fff; border:none; border-radius:14px; padding:16px; font-size:15px; font-weight:800; cursor:pointer; width:100%;">
+        💾 保存并刷新看板
+      </button>
+
+      <div style="text-align:center; font-size:11px; color:var(--text-sub);">数据保存在本地 localStorage，刷新页面不会丢失</div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  .input-label {
+    display: block;
+    font-size: 11px;
+    color: var(--text-sub);
+    margin-bottom: 5px;
+    font-weight: 600;
+  }
+  .data-input {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .data-input:focus { border-color: #ff2442; }
+</style>
+
+<!-- ─── JAVASCRIPT ─── -->
+<script>
+// ── Helpers ──
+const $ = id => document.getElementById(id);
+const fmt = (v, dec=1) => v == null ? '—' : Number(v).toFixed(dec);
+const fmtK = v => v == null ? '—' : (Math.abs(v)>=10000 ? (v/10000).toFixed(1)+'万' : v.toFixed(0));
+
+function pctChange(cur, prev) {
+  if (!prev || prev === 0) return null;
+  return ((cur - prev) / Math.abs(prev) * 100);
+}
+
+function setChange(el, cur, prev, isReverse=false) {
+  if (!el) return;
+  const pct = pctChange(cur, prev);
+  if (pct == null) { el.textContent = '—'; el.className = 'stat-change flat'; return; }
+  const up = pct > 0;
+  const displayUp = isReverse ? !up : up;
+  el.className = 'stat-change ' + (displayUp ? 'up' : 'down');
+  el.textContent = (up ? '▲' : '▼') + ' ' + Math.abs(pct).toFixed(1) + '%';
+}
+
+function setDeltaEl(el, cur, prev) {
+  if (!el) return;
+  const pct = pctChange(cur, prev);
+  const delta = cur - prev;
+  if (pct == null) { el.textContent = '—'; el.className = 'mdr-delta flat'; return; }
+  const up = delta > 0;
+  el.className = 'mdr-delta ' + (up ? 'up' : 'down');
+  el.textContent = (up?'▲':'▼') + ' ' + Math.abs(delta).toFixed(1) + '万 (' + Math.abs(pct).toFixed(0) + '%)';
+}
+
+// ── Date init ──
+function initDate() {
+  const d = new Date();
+  const days = ['周日','周一','周二','周三','周四','周五','周六'];
+  $('hdr-date').textContent = `${d.getMonth()+1}/${d.getDate()}`;
+  $('hdr-day').textContent = days[d.getDay()];
+  $('data-freshness').textContent = `最近更新：${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ── Tab switch ──
+function switchTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  $('page-' + tab).classList.add('active');
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+}
+
+// ── Modal ──
+function openDataEntry() {
+  loadInputsFromStorage();
+  $('modal-overlay').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  $('modal-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// ── Storage keys ──
+const KEYS = {
+  nums: 'dm_nums_v1',
+  anomaly: 'dm_anomaly_v1',
+  cate: 'dm_cate_v1',
+  sellers: 'dm_sellers_v1',
+  goods: 'dm_goods_v1',
+  price: 'dm_price_v1',
+  heatmap: 'dm_heatmap_v1',
+};
+
+function saveData() {
+  // numeric inputs
+  const nums = {};
+  [
+    'today-dgmv','yd-dgmv','lw-dgmv','mtd-dgmv',
+    'today-dab','yd-dab','today-atv','yd-atv',
+    'today-k','today-d','today-n','yd-k','yd-d','yd-n',
+    '7d-k','7d-d','7d-n','p7d-k','p7d-d','p7d-n',
+    '7d-k-sellers','7d-d-sellers','7d-active-sellers','7d-k-pit','7d-n-price',
+  ].forEach(k => {
+    const v = parseFloat($('inp-' + k).value);
+    if (!isNaN(v)) nums[k] = v;
+  });
+  localStorage.setItem(KEYS.nums, JSON.stringify(nums));
+
+  // JSON fields
+  const jsonFields = ['anomaly','cate','seller','goods','price','heatmap'];
+  jsonFields.forEach(f => {
+    const raw = $('inp-' + f + '-json').value.trim();
+    if (raw) {
+      try { JSON.parse(raw); localStorage.setItem(KEYS[f === 'seller' ? 'sellers' : f], raw); }
+      catch(e) { alert('⚠️ ' + f + ' JSON格式有误，请检查'); return; }
+    }
+  });
+
+  closeModal();
+  renderAll();
+}
+
+function loadInputsFromStorage() {
+  const nums = JSON.parse(localStorage.getItem(KEYS.nums) || '{}');
+  Object.keys(nums).forEach(k => {
+    const el = $('inp-' + k);
+    if (el) el.value = nums[k];
+  });
+  const jsonMap = {anomaly: KEYS.anomaly, cate: KEYS.cate, seller: KEYS.sellers, goods: KEYS.goods, price: KEYS.price, heatmap: KEYS.heatmap};
+  Object.keys(jsonMap).forEach(f => {
+    const el = $('inp-' + f + '-json');
+    const val = localStorage.getItem(jsonMap[f]);
+    if (el && val) el.value = val;
+  });
+}
+
+// ── RENDER ALL ──
+function renderAll() {
+  const nums = JSON.parse(localStorage.getItem(KEYS.nums) || '{}');
+  const G = k => nums[k] ?? null;
+
+  // ─ Page 1: Today ─
+  const todayDgmv = G('today-dgmv');
+  const ydDgmv    = G('yd-dgmv');
+  const lwDgmv    = G('lw-dgmv');
+  const mtdDgmv   = G('mtd-dgmv');
+
+  $('t-dgmv-val').textContent = todayDgmv != null ? fmt(todayDgmv) : '—';
+  $('t-dgmv-yd').textContent  = ydDgmv != null ? fmt(ydDgmv) : '—';
+  $('t-dgmv-lw').textContent  = lwDgmv != null ? fmt(lwDgmv) : '—';
+  $('t-dgmv-mtd').textContent = mtdDgmv != null ? fmt(mtdDgmv,0) : '—';
+  setChange($('t-dgmv-dod-pct'), todayDgmv, ydDgmv);
+  if (todayDgmv != null && ydDgmv != null) {
+    const pct = pctChange(todayDgmv, ydDgmv);
+    const el = $('t-dgmv-dod-pct');
+    el.textContent = (pct>0?'▲':'▼') + ' ' + Math.abs(pct).toFixed(1) + '% vs 昨日';
+    el.className = 'stat-change ' + (pct>0?'up':'down');
+  }
+
+  // DAB
+  const todayDab = G('today-dab'), ydDab = G('yd-dab');
+  $('t-dab-val').textContent = todayDab != null ? Math.round(todayDab).toLocaleString() : '—';
+  setChange($('t-dab-change'), todayDab, ydDab);
+  if (todayDab != null && ydDab != null) {
+    const pct = pctChange(todayDab, ydDab);
+    $('t-dab-change').textContent = (pct>0?'▲':'▼') + ' ' + Math.abs(pct).toFixed(1) + '% vs 昨日';
+  }
+
+  // ATV
+  const todayAtv = G('today-atv'), ydAtv = G('yd-atv');
+  $('t-atv-val').textContent = todayAtv != null ? fmt(todayAtv,0) : '—';
+  if (todayAtv != null && ydAtv != null) {
+    const pct = pctChange(todayAtv, ydAtv);
+    const el = $('t-atv-change');
+    el.textContent = (pct>0?'▲':'▼') + ' ' + Math.abs(pct).toFixed(1) + '% vs 昨日';
+    el.className = 'stat-change ' + (pct>0?'up':'down');
+  }
+
+  // Today channel
+  const todayK=G('today-k'), ydK=G('yd-k');
+  const todayD=G('today-d'), ydD=G('yd-d');
+  const todayN=G('today-n'), ydN=G('yd-n');
+  $('t-k-val').textContent = todayK!=null ? fmt(todayK) : '—';
+  $('t-d-val').textContent = todayD!=null ? fmt(todayD) : '—';
+  $('t-n-val').textContent = todayN!=null ? fmt(todayN) : '—';
+  setDeltaEl($('t-k-delta'), todayK, ydK);
+  setDeltaEl($('t-d-delta'), todayD, ydD);
+  setDeltaEl($('t-n-delta'), todayN, ydN);
+
+  // ─ Page 2: Trend (7d channel) ─
+  const k7=G('7d-k'), d7=G('7d-d'), n7=G('7d-n');
+  const kp=G('p7d-k'), dp=G('p7d-d'), np=G('p7d-n');
+  const total7 = (k7||0)+(d7||0)+(n7||0);
+
+  if (total7 > 0) {
+    const kPct = Math.round(k7/total7*100);
+    const dPct = Math.round(d7/total7*100);
+    const nPct = 100 - kPct - dPct;
+    $('leg-k').textContent = kPct + '%';
+    $('leg-d').textContent = dPct + '%';
+    $('leg-n').textContent = nPct + '%';
+    $('seg-k').style.flex = kPct;
+    $('seg-d').style.flex = dPct;
+    $('seg-n').style.flex = nPct;
+    // Page 4 channel stacks
+    $('ch-k-pct').textContent = kPct + '%';
+    $('ch-d-pct').textContent = dPct + '%';
+    $('ch-n-pct').textContent = nPct + '%';
+    $('ch-k-abs').textContent = fmt(k7);
+    $('ch-d-abs').textContent = fmt(d7);
+    $('ch-n-abs').textContent = fmt(n7);
+  }
+
+  // 7d channel bars
+  renderChannelBars(k7, d7, n7, kp, dp, np);
+
+  // ─ Page 2: Anomaly ─
+  renderAnomaly();
+  renderCateAnomaly();
+
+  // ─ Page 3: Seller ─
+  const active = G('7d-active-sellers');
+  $('s-active').textContent = active != null ? active : '—';
+  if (active != null) {
+    $('s-active-pct').textContent = '动销率 ' + fmt(active/309*100,0) + '%';
+    $('s-active-pct').className = 'stat-change ' + (active/309 > 0.6 ? 'down' : 'up');
+    const inactive = 309 - active;
+    $('s-inactive').textContent = inactive;
+    if (inactive > 30) { $('s-warn-badge').style.display='inline-flex'; }
+  }
+  const kSellers = G('7d-k-sellers'), dSellers = G('7d-d-sellers');
+  $('s-k-active').textContent = kSellers != null ? kSellers : '—';
+  $('s-d-active').textContent = dSellers != null ? dSellers : '—';
+  if (kSellers && active) $('s-k-pct').textContent = fmt(kSellers/active*100,0) + '%';
+  if (dSellers && active) $('s-d-pct').textContent = fmt(dSellers/active*100,0) + '%';
+
+  renderSellerTable();
+
+  // ─ Page 4: Channel detail ─
+  $('k-dgmv').textContent = k7 != null ? fmt(k7) : '—';
+  $('d-dgmv').textContent = d7 != null ? fmt(d7) : '—';
+  $('n-dgmv').textContent = n7 != null ? fmt(n7) : '—';
+  if (k7!=null && kp!=null) {
+    const pct = pctChange(k7, kp);
+    const el=$('k-dgmv-chg'); el.textContent=(pct>0?'▲':'▼')+Math.abs(pct).toFixed(1)+'% vs 上7天'; el.className='stat-change '+(pct>0?'up':'down');
+  }
+  if (d7!=null && dp!=null) {
+    const pct = pctChange(d7, dp);
+    const el=$('d-dgmv-chg'); el.textContent=(pct>0?'▲':'▼')+Math.abs(pct).toFixed(1)+'% vs 上7天'; el.className='stat-change '+(pct>0?'up':'down');
+  }
+  if (n7!=null && np!=null) {
+    const pct = pctChange(n7, np);
+    const el=$('n-dgmv-chg'); el.textContent=(pct>0?'▲':'▼')+Math.abs(pct).toFixed(1)+'% vs 上7天'; el.className='stat-change '+(pct>0?'up':'down');
+  }
+  $('k-sellers').textContent = kSellers != null ? kSellers : '—';
+  $('d-sellers').textContent = dSellers != null ? dSellers : '—';
+  const kPit = G('7d-k-pit');
+  $('k-pit').textContent = kPit != null ? fmt(kPit) : '—';
+  const nPrice = G('7d-n-price');
+  $('n-price').textContent = nPrice != null ? fmt(nPrice,0) : '—';
+  if (total7 > 0) {
+    $('k-share').textContent = fmt(k7/total7*100,0);
+    $('n-share').textContent = fmt(n7/total7*100,0);
+  }
+
+  // ─ Page 5: Goods ─
+  renderGoodsTable();
+  renderPriceBands();
+  renderHeatmap();
+}
+
+// ── Channel bars render ──
+function renderChannelBars(k7, d7, n7, kp, dp, np) {
+  const wrap = $('channel-7d-bars');
+  const maxVal = Math.max(k7||0, d7||0, n7||0, kp||0, dp||0, np||0, 0.01);
+  const channels = [
+    {name:'K播', icon:'📹', cur:k7, prev:kp, color:'#ff2442'},
+    {name:'店播', icon:'🏪', cur:d7, prev:dp, color:'#3b82f6'},
+    {name:'商笔', icon:'📝', cur:n7, prev:np, color:'#00b578'},
+  ];
+
+  if (!k7 && !d7 && !n7) {
+    wrap.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-label); font-size:12px;">请先录入数据</div>';
+    return;
+  }
+
+  wrap.innerHTML = channels.map(c => {
+    const pct = pctChange(c.cur, c.prev);
+    const barW = c.cur ? Math.round(c.cur/maxVal*100) : 0;
+    const chgTxt = pct != null ? ((pct>0?'▲':'▼') + Math.abs(pct).toFixed(0) + '%') : '—';
+    const chgCls = pct > 0 ? 'up' : (pct < 0 ? 'down' : '');
+    return `
+      <div class="mini-bar-row">
+        <div class="mini-bar-label">${c.icon} ${c.name}</div>
+        <div class="mini-bar-track">
+          <div class="mini-bar-fill" style="width:${barW}%; background:${c.color};"></div>
+        </div>
+        <div class="mini-bar-val">${c.cur!=null?fmt(c.cur):'—'}万</div>
+        <div class="mini-bar-change ${chgCls}">${chgTxt}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── Anomaly render ──
+function renderAnomaly() {
+  const raw = localStorage.getItem(KEYS.anomaly);
+  if (!raw) return;
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { return; }
+
+  data.forEach(d => { d._delta = d.cur - d.prev; d._pct = pctChange(d.cur, d.prev); });
+  const sorted = [...data].sort((a,b) => b._delta - a._delta);
+  const surges = sorted.filter(d => d._delta > 0).slice(0,5);
+  const drops  = sorted.filter(d => d._delta < 0).reverse().slice(0,5);
+
+  const renderList = (items, type, container) => {
+    if (!items.length) { $( container ).innerHTML = '<div class="empty-hint" style="padding:12px 0;">暂无数据</div>'; return; }
+    $(container).innerHTML = items.map((d, i) => `
+      <div class="anomaly-item">
+        <div class="anomaly-rank ${type}">${i+1}</div>
+        <div class="anomaly-main">
+          <div class="anomaly-name">${d.name}</div>
+          <div class="anomaly-meta">
+            <span class="pill pill-${d.channel==='K播'?'k':d.channel==='店播'?'d':'n'}">${d.channel}</span>
+            &nbsp;近3天均值 ${fmt(d.cur)}万 | 前3天 ${fmt(d.prev)}万
+          </div>
+        </div>
+        <div class="anomaly-right">
+          <div class="anomaly-delta ${type==='surge'?'up':'down'}">${type==='surge'?'+':''}${fmt(d._delta)}万</div>
+          <div class="anomaly-pct ${type==='surge'?'up':'down'}">${d._pct!=null?(d._pct>0?'▲':'▼')+Math.abs(d._pct).toFixed(0)+'%':'—'}</div>
+        </div>
+      </div>
+    `).join('');
+  };
+
+  renderList(surges, 'surge', 'surge-list');
+  renderList(drops,  'drop',  'drop-list');
+}
+
+function renderCateAnomaly() {
+  const raw = localStorage.getItem(KEYS.cate);
+  if (!raw) return;
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { return; }
+
+  data.forEach(d => { d._delta = d.cur - d.prev; });
+  const sorted = [...data].sort((a,b) => b._delta - a._delta);
+  const surges = sorted.filter(d => d._delta > 0).slice(0,5);
+  const drops  = sorted.filter(d => d._delta < 0).reverse().slice(0,5);
+
+  const miniItem = (d, type) => `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid #f3f4f6; font-size:12px;">
+      <div>
+        <div style="font-weight:600;">${d.name}</div>
+        <div style="font-size:10px; color:var(--text-sub);">${d.channel}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-weight:700; color:${type==='surge'?'var(--red)':'var(--green)'};">${type==='surge'?'+':''}${fmt(d._delta)}万</div>
+        <div style="font-size:10px; color:${type==='surge'?'var(--red)':'var(--green)'};">${d._delta!=0?(pctChange(d.cur,d.prev)||0).toFixed(0)+'%':''}</div>
+      </div>
+    </div>
+  `;
+
+  $('cate-surge-list').innerHTML = surges.length ? surges.map(d => miniItem(d,'surge')).join('') : '<div class="empty-hint" style="padding:8px 0; font-size:12px;">无</div>';
+  $('cate-drop-list').innerHTML  = drops.length  ? drops.map(d => miniItem(d,'drop')).join('')  : '<div class="empty-hint" style="padding:8px 0; font-size:12px;">无</div>';
+}
+
+// ── Seller table ──
+function renderSellerTable() {
+  const raw = localStorage.getItem(KEYS.sellers);
+  if (!raw) return;
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { return; }
+  data.sort((a,b) => b.dgmv - a.dgmv);
+  const tbody = $('seller-tbody');
+  const channelPill = ch => {
+    const cls = ch==='K播'?'pill-k':ch==='店播'?'pill-d':ch==='商笔'?'pill-n':'pill-c';
+    return `<span class="pill ${cls}">${ch}</span>`;
+  };
+  tbody.innerHTML = data.slice(0,15).map((d, i) => {
+    const pct = pctChange(d.dgmv, d.prev);
+    const pctTxt = pct != null ? `<span style="color:${pct>0?'var(--red)':'var(--green)'}; font-size:11px;">${pct>0?'▲':'▼'}${Math.abs(pct).toFixed(0)}%</span>` : '—';
+    return `
+      <tr>
+        <td style="color:var(--text-label); font-size:11px;">${i+1}</td>
+        <td><div class="td-name">${d.name}</div></td>
+        <td style="font-weight:700; font-size:13px;">${fmt(d.dgmv)}</td>
+        <td>${pctTxt}</td>
+        <td>${channelPill(d.channel)}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ── Goods table ──
+function renderGoodsTable() {
+  const raw = localStorage.getItem(KEYS.goods);
+  if (!raw) return;
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { return; }
+  data.sort((a,b) => b.dgmv - a.dgmv);
+  const channelPill = ch => {
+    const cls = ch==='K播'?'pill-k':ch==='店播'?'pill-d':ch==='商笔'?'pill-n':'pill-c';
+    return `<span class="pill ${cls}">${ch}</span>`;
+  };
+  $('goods-tbody').innerHTML = data.slice(0,15).map((d, i) => `
+    <tr>
+      <td style="color:var(--text-label); font-size:11px;">${i+1}</td>
+      <td><div class="td-name" style="max-width:140px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${d.name}</div></td>
+      <td style="font-weight:700;">${fmt(d.dgmv)}</td>
+      <td>${channelPill(d.channel)}</td>
+    </tr>
+  `).join('');
+}
+
+// ── Price bands ──
+function renderPriceBands() {
+  const raw = localStorage.getItem(KEYS.price);
+  if (!raw) return;
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { return; }
+  const maxVal = Math.max(...data.map(d => d.dgmv), 0.01);
+  const colors = ['#ff2442','#f59e0b','#3b82f6','#8b5cf6','#00b578','#06b6d4'];
+  $('price-band-bars').innerHTML = data.map((d, i) => `
+    <div class="mini-bar-row">
+      <div class="mini-bar-label" style="width:70px;">${d.label}</div>
+      <div class="mini-bar-track">
+        <div class="mini-bar-fill" style="width:${Math.round(d.dgmv/maxVal*100)}%; background:${colors[i%colors.length]};"></div>
+      </div>
+      <div class="mini-bar-val">${fmt(d.dgmv)}万</div>
+    </div>
+  `).join('');
+}
+
+// ── Heatmap ──
+function renderHeatmap() {
+  const raw = localStorage.getItem(KEYS.heatmap);
+  if (!raw) return;
+  let data;
+  try { data = JSON.parse(raw); } catch(e) { return; }
+  data.sort((a,b) => (b.k+b.d+b.n) - (a.k+a.d+a.n));
+
+  // find max for heat coloring
+  const allVals = data.flatMap(d => [d.k, d.d, d.n]);
+  const maxVal = Math.max(...allVals, 0.01);
+
+  const heatColor = v => {
+    const ratio = v / maxVal;
+    if (ratio > 0.7) return 'background:#fff0f2; color:var(--red); font-weight:800;';
+    if (ratio > 0.4) return 'background:#fff8ee; color:var(--orange);';
+    if (ratio > 0.1) return 'background:#f0fdf4; color:var(--green);';
+    return 'color:var(--text-label);';
+  };
+
+  $('heatmap-tbody').innerHTML = data.map(d => {
+    const total = (d.k||0) + (d.d||0) + (d.n||0);
+    return `
+      <tr>
+        <td><div class="td-name">${d.cate}</div></td>
+        <td style="${heatColor(d.k||0)}">${d.k ? fmt(d.k) : '—'}</td>
+        <td style="${heatColor(d.d||0)}">${d.d ? fmt(d.d) : '—'}</td>
+        <td style="${heatColor(d.n||0)}">${d.n ? fmt(d.n) : '—'}</td>
+        <td style="font-weight:700;">${fmt(total)}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ── SVG Trend (placeholder with animation) ──
+function drawTrendPlaceholder() {
+  // Draw dummy sine-like sparkline as placeholder
+  const svg = $('trend-svg');
+  const W = 340, H = 100, pad = 10;
+  const pts = 14;
+  const dummyMain = Array.from({length:pts}, (_,i) => 40 + 35*Math.sin(i*0.7) + 5*Math.sin(i*2.1));
+  const dummyLast = Array.from({length:pts}, (_,i) => 35 + 30*Math.sin(i*0.7+0.5) + 3*Math.sin(i*2));
+
+  const toSVG = (arr) => {
+    const minV = Math.min(...arr), maxV = Math.max(...arr);
+    const range = maxV - minV || 1;
+    return arr.map((v, i) => {
+      const x = pad + i * (W - 2*pad) / (pts-1);
+      const y = H - pad - (v - minV) / range * (H - 2*pad);
+      return [x, y];
+    });
+  };
+
+  const mainPts = toSVG(dummyMain);
+  const lastPts = toSVG(dummyLast);
+  const ptStr = arr => arr.map(p => p.join(',')).join(' ');
+
+  $('svg-line-tw').setAttribute('points', ptStr(mainPts));
+  $('svg-line-lw').setAttribute('points', ptStr(lastPts));
+
+  // Area paths
+  const areaPath = (pts) => {
+    const first = pts[0], last = pts[pts.length-1];
+    return `M${first[0]},${H} L${ptStr(pts).replace(/,/g,' L').split(' L').join(' L')} L${last[0]},${H} Z`;
+  };
+  $('svg-area-tw').setAttribute('d', areaPath(mainPts));
+  $('svg-area-lw').setAttribute('d', areaPath(lastPts));
+
+  // Date labels
+  const lbl = $('trend-labels');
+  const today = new Date();
+  const labelDays = [-13, -10, -7, -4, -1, 0];
+  lbl.innerHTML = '';
+  // just show first, middle, last
+  [0, 6, 13].forEach(i => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - (13 - i));
+    const span = document.createElement('span');
+    span.textContent = `${d.getMonth()+1}/${d.getDate()}`;
+    lbl.appendChild(span);
+  });
+}
+
+// ── Init ──
+initDate();
+drawTrendPlaceholder();
+renderAll();
+</script>
+</body>
+</html>
