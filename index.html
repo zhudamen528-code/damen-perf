@@ -1749,167 +1749,104 @@ function renderHeatmap(data) {
 
 // ── SVG Trend (placeholder with animation) ──
 function drawTrendPlaceholder() {
-  // 优先用真实数据，fallback 用占位曲线
-  const trendRaw = localStorage.getItem('dm_trend_v1');
   const svg = $('trend-svg');
+  if (!svg) return;
   const W = 340, H = 100, pad = 10;
 
-  // 直接用 DATA 常量（不再依赖 localStorage）
   const labels = DATA.trend.map(d => d[0]);
   const vals   = DATA.trend.map(d => d[1]);
+  const lwVals = DATA.lwTrend.map(d => d[1]);
+  const nPts   = vals.length;
 
-  const minV = Math.min(...vals), maxV = Math.max(...vals);
-  const range = maxV - minV || 1;
-  const nPts = vals.length;
+  // Y 轴用本期 + 上周同期合并范围
+  const allV    = [...vals, ...lwVals];
+  const minV    = Math.min(...allV), maxV = Math.max(...allV);
+  const range   = maxV - minV || 1;
 
   const toXY = (v, i) => ({
     x: pad + i * (W - 2*pad) / (nPts - 1),
     y: H - pad - (v - minV) / range * (H - 2*pad)
   });
-
-  const pts2d = vals.map((v,i) => toXY(v, i));
-  const ptStr = arr => arr.map(p => `${p.x},${p.y}`).join(' ');
-  const areaPath = (pts) => {
-    const first = pts[0], last = pts[pts.length-1];
-    return `M${first.x},${H} ` + pts.map(p=>`L${p.x},${p.y}`).join(' ') + ` L${last.x},${H} Z`;
+  const ptStr   = arr => arr.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const areaPath = pts => {
+    const f = pts[0], l = pts[pts.length-1];
+    return `M${f.x},${H} ` + pts.map(p=>`L${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ') + ` L${l.x},${H} Z`;
   };
 
-  $('svg-line-tw').setAttribute('points', ptStr(pts2d));
-  $('svg-area-tw').setAttribute('d', areaPath(pts2d));
+  const pts  = vals.map(toXY);
+  const lwPts = lwVals.map(toXY);
 
-  // 上周同期线
-  // 本期：04/09~04/22（14天），上周同期：04/02~04/15（14天）
-  // 对齐方式：上周第i天 对应 本期第i天（都画在同一X位置），直接比较同位序的值
-  // lwTrendData[0]=04/02 对应 trendData[0]=04/09，表示"比本期早7天的同期"
-  // 上周同期直接从 DATA.lwTrend 读取
-  {
-    const lwData = DATA.lwTrend;
-    const lwVals = lwData.map(d => d[1]);
-    // 用本期+上周同期合并确定Y轴范围，避免灰线超出图表
-    const allValsForRange = [...vals, ...lwVals];
-    const globalMinV = Math.min(...allValsForRange);
-    const globalMaxV = Math.max(...allValsForRange);
-    const globalRange = globalMaxV - globalMinV || 1;
-    // 重新计算本期点（用全局range）
-    const toXYGlobal = (v, i) => ({
-      x: pad + i * (W - 2*pad) / (nPts - 1),
-      y: H - pad - (v - globalMinV) / globalRange * (H - 2*pad)
-    });
-    const pts2dG = vals.map((v,i) => toXYGlobal(v, i));
-    $('svg-line-tw').setAttribute('points', ptStr(pts2dG));
-    $('svg-area-tw').setAttribute('d', areaPath(pts2dG));
-    // 重新画本期点（tooltip也要更新）
-    svg.querySelectorAll('.trend-dot, .trend-tooltip').forEach(e => e.remove());
-    pts2dG.forEach((p, i) => {
-      const isToday = i === pts2dG.length - 1;
-      const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
-      circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y);
-      circle.setAttribute('r', isToday ? 4 : 3);
-      circle.setAttribute('fill', isToday ? '#ff2442' : 'rgba(255,36,66,0.7)');
-      circle.setAttribute('stroke','#fff'); circle.setAttribute('stroke-width','1.5');
-      circle.classList.add('trend-dot'); circle.style.cursor='pointer';
-      const tipW=80, tipH=32;
-      const tipX=Math.min(p.x-tipW/2, W-tipW-2);
-      const tipY=p.y<40?p.y+8:p.y-tipH-6;
-      const g=document.createElementNS('http://www.w3.org/2000/svg','g');
-      g.classList.add('trend-tooltip'); g.style.opacity='0'; g.style.pointerEvents='none'; g.style.transition='opacity 0.15s';
-      const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
-      rect.setAttribute('x',tipX); rect.setAttribute('y',tipY); rect.setAttribute('width',tipW); rect.setAttribute('height',tipH); rect.setAttribute('rx','6'); rect.setAttribute('fill','rgba(17,24,39,0.88)');
-      const t1=document.createElementNS('http://www.w3.org/2000/svg','text');
-      t1.setAttribute('x',tipX+tipW/2); t1.setAttribute('y',tipY+13); t1.setAttribute('text-anchor','middle'); t1.setAttribute('fill','rgba(255,255,255,0.7)'); t1.setAttribute('font-size','9');
-      t1.textContent=labels[i]+(isToday?' 实时':'');
-      const t2=document.createElementNS('http://www.w3.org/2000/svg','text');
-      t2.setAttribute('x',tipX+tipW/2); t2.setAttribute('y',tipY+26); t2.setAttribute('text-anchor','middle'); t2.setAttribute('fill','#fff'); t2.setAttribute('font-size','11'); t2.setAttribute('font-weight','700');
-      t2.textContent=vals[i].toFixed(1)+'万';
-      g.appendChild(rect); g.appendChild(t1); g.appendChild(t2); svg.appendChild(g);
-      circle.addEventListener('mouseenter',()=>{g.style.opacity='1';});
-      circle.addEventListener('mouseleave',()=>{g.style.opacity='0';});
-      circle.addEventListener('touchstart',(e)=>{e.preventDefault();g.style.opacity='1';setTimeout(()=>g.style.opacity='0',2000);});
-      svg.appendChild(circle);
-    });
-    // 画上周同期灰线（同X位置，灰色虚线）
-    const lwPts2d = lwVals.map((v, i) => ({
-      x: pad + i * (W - 2*pad) / (nPts - 1),
-      y: H - pad - (v - globalMinV) / globalRange * (H - 2*pad)
-    }));
-    $('svg-line-lw').setAttribute('points', ptStr(lwPts2d));
-    $('svg-area-lw').setAttribute('d', areaPath(lwPts2d));
+  // 画线
+  $('svg-line-tw').setAttribute('points', ptStr(pts));
+  $('svg-area-tw').setAttribute('d', areaPath(pts));
+  $('svg-line-lw').setAttribute('points', ptStr(lwPts));
+  $('svg-area-lw').setAttribute('d', areaPath(lwPts));
 
-    // 上周同期 dots（小灰点，不加 tooltip，避免过于密集）
-    lwPts2d.forEach((p, i) => {
-      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
-      c.setAttribute('cx', p.x); c.setAttribute('cy', p.y); c.setAttribute('r', 2.5);
-      c.setAttribute('fill', 'rgba(156,163,175,0.7)'); c.setAttribute('stroke','#fff'); c.setAttribute('stroke-width','1');
-      c.classList.add('trend-dot');
-      svg.appendChild(c);
-    });
-  } else {
-    $('svg-line-lw').setAttribute('points', '');
-    $('svg-area-lw').setAttribute('d', '');
-  }
-
-  // Dot 标注 + Tooltip
-  // 移除旧的 dots
+  // 清除旧 dots / tooltips
   svg.querySelectorAll('.trend-dot, .trend-tooltip').forEach(e => e.remove());
 
-  pts2d.forEach((p, i) => {
-    const isToday = i === pts2d.length - 1;
-    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    circle.setAttribute('cx', p.x);
-    circle.setAttribute('cy', p.y);
-    circle.setAttribute('r', isToday ? 4 : 3);
-    circle.setAttribute('fill', isToday ? '#ff2442' : 'rgba(255,36,66,0.6)');
-    circle.setAttribute('stroke', '#fff');
-    circle.setAttribute('stroke-width', '1.5');
-    circle.classList.add('trend-dot');
-    circle.style.cursor = 'pointer';
+  // 上周同期灰点（无 tooltip）
+  lwPts.forEach(p => {
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx', p.x); c.setAttribute('cy', p.y); c.setAttribute('r', '2');
+    c.setAttribute('fill','rgba(156,163,175,0.6)'); c.setAttribute('stroke','#fff'); c.setAttribute('stroke-width','1');
+    c.classList.add('trend-dot');
+    svg.appendChild(c);
+  });
 
-    // Tooltip
+  // 本期红点 + tooltip
+  pts.forEach((p, i) => {
+    const isToday = i === pts.length - 1;
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y);
+    circle.setAttribute('r', isToday ? '4' : '3');
+    circle.setAttribute('fill', isToday ? '#ff2442' : 'rgba(255,36,66,0.7)');
+    circle.setAttribute('stroke','#fff'); circle.setAttribute('stroke-width','1.5');
+    circle.classList.add('trend-dot'); circle.style.cursor = 'pointer';
+
     const tipW = 80, tipH = 32;
     const tipX = Math.min(p.x - tipW/2, W - tipW - 2);
     const tipY = p.y < 40 ? p.y + 8 : p.y - tipH - 6;
     const g = document.createElementNS('http://www.w3.org/2000/svg','g');
     g.classList.add('trend-tooltip');
-    g.style.opacity = '0';
-    g.style.pointerEvents = 'none';
-    g.style.transition = 'opacity 0.15s';
+    g.style.cssText = 'opacity:0;pointer-events:none;transition:opacity 0.15s';
 
     const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
     rect.setAttribute('x', tipX); rect.setAttribute('y', tipY);
     rect.setAttribute('width', tipW); rect.setAttribute('height', tipH);
-    rect.setAttribute('rx', '6'); rect.setAttribute('fill','rgba(17,24,39,0.88)');
+    rect.setAttribute('rx','6'); rect.setAttribute('fill','rgba(17,24,39,0.88)');
 
     const t1 = document.createElementNS('http://www.w3.org/2000/svg','text');
     t1.setAttribute('x', tipX+tipW/2); t1.setAttribute('y', tipY+13);
-    t1.setAttribute('text-anchor','middle'); t1.setAttribute('fill','rgba(255,255,255,0.7)');
-    t1.setAttribute('font-size','9');
-    t1.textContent = labels[i] + (isToday?' 实时':'');
+    t1.setAttribute('text-anchor','middle'); t1.setAttribute('fill','rgba(255,255,255,0.7)'); t1.setAttribute('font-size','9');
+    t1.textContent = labels[i] + (isToday ? ' 实时' : '');
 
     const t2 = document.createElementNS('http://www.w3.org/2000/svg','text');
     t2.setAttribute('x', tipX+tipW/2); t2.setAttribute('y', tipY+26);
     t2.setAttribute('text-anchor','middle'); t2.setAttribute('fill','#fff');
     t2.setAttribute('font-size','11'); t2.setAttribute('font-weight','700');
-    t2.textContent = vals[i].toLocaleString() + '万';
+    t2.textContent = vals[i].toFixed(1) + '万';
 
     g.appendChild(rect); g.appendChild(t1); g.appendChild(t2);
     svg.appendChild(g);
 
-    // Hover events
-    circle.addEventListener('mouseenter',  () => { g.style.opacity='1'; });
-    circle.addEventListener('mouseleave',  () => { g.style.opacity='0'; });
-    circle.addEventListener('touchstart', (e) => { e.preventDefault(); g.style.opacity='1'; setTimeout(()=>g.style.opacity='0',2000); });
+    circle.addEventListener('mouseenter',  () => { g.style.opacity = '1'; });
+    circle.addEventListener('mouseleave',  () => { g.style.opacity = '0'; });
+    circle.addEventListener('touchstart', e => { e.preventDefault(); g.style.opacity='1'; setTimeout(()=>g.style.opacity='0',2000); });
     svg.appendChild(circle);
   });
 
-  // Date labels（只显示 3 个）
+  // 日期标签
   const lbl = $('trend-labels');
-  lbl.innerHTML = '';
-  [0, Math.floor((nPts-1)/2), nPts-1].forEach(i => {
-    const span = document.createElement('span');
-    span.textContent = labels[i];
-    if (i === nPts-1) { span.style.color='var(--red)'; span.style.fontWeight='700'; }
-    lbl.appendChild(span);
-  });
+  if (lbl) {
+    lbl.innerHTML = '';
+    [0, Math.floor((nPts-1)/2), nPts-1].forEach(i => {
+      const span = document.createElement('span');
+      span.textContent = labels[i];
+      if (i === nPts-1) { span.style.color='var(--red)'; span.style.fontWeight='700'; }
+      lbl.appendChild(span);
+    });
+  }
 }
 
 // ── Seed today's data (2026-04-22) ──
