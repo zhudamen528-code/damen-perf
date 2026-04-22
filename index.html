@@ -702,20 +702,7 @@
     </div>
   </div>
 
-  <!-- 数据录入入口 -->
-  <div class="card" style="border: 1.5px dashed #cbd5e1;">
-    <div class="card-title">
-      <span class="ct-dot" style="background:var(--gray)"></span>
-      数据录入（手动同步）
-    </div>
-    <div class="alert-strip info">
-      <span class="alert-icon">ℹ️</span>
-      <span class="alert-text">从 RedBI 看板获取数据后，<strong>在下方填入数值</strong>，看板自动计算环比并刷新所有图表。数据保存在本地浏览器。</span>
-    </div>
-    <button class="fill-hint" onclick="openDataEntry()">
-      ✏️ 打开数据录入面板
-    </button>
-  </div>
+
 
 </div>
 
@@ -1333,173 +1320,7 @@
 <!-- ═══════════════════════════════════════════
      DATA ENTRY MODAL
 ═══════════════════════════════════════════ -->
-<div id="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:200; overflow-y:auto; padding:20px 16px 40px;">
-  <div style="max-width:600px; margin:0 auto; background:#fff; border-radius:20px; overflow:hidden;">
-    <div style="background: linear-gradient(135deg,#1a1a2e,#0f3460); padding:18px 20px; display:flex; justify-content:space-between; align-items:center;">
-      <div>
-        <div style="color:#fff; font-size:16px; font-weight:800;">✏️ 数据录入</div>
-        <div style="color:rgba(255,255,255,0.55); font-size:11px; margin-top:3px;">从 RedBI 复制数据后填入以下字段</div>
-      </div>
-      <button onclick="closeModal()" style="background:rgba(255,255,255,0.1); border:none; color:#fff; font-size:20px; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;">×</button>
-    </div>
-
-    <div style="padding:20px; display:flex; flex-direction:column; gap:20px;">
-
-      <!-- Section: 今日实时 -->
-      <div>
-        <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
-          🔴 今日实时数据
-          <span style="font-size:10px; color:var(--text-sub); font-weight:400;">（实时订单看板获取）</span>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-          <div><label class="input-label">今日累计 DGMV（万）</label><input class="data-input" id="inp-today-dgmv" type="number" placeholder="如 42.5"></div>
-          <div><label class="input-label">昨日同期 DGMV（万）</label><input class="data-input" id="inp-yd-dgmv" type="number" placeholder="如 38.2"></div>
-          <div><label class="input-label">上周同期 DGMV（万）</label><input class="data-input" id="inp-lw-dgmv" type="number" placeholder="如 40.0"></div>
-          <div><label class="input-label">月累计 MTD（万）</label><input class="data-input" id="inp-mtd-dgmv" type="number" placeholder="如 520"></div>
-          <div><label class="input-label">今日 DAB（下单人数）</label><input class="data-input" id="inp-today-dab" type="number" placeholder="如 1280"></div>
-          <div><label class="input-label">昨日 DAB</label><input class="data-input" id="inp-yd-dab" type="number" placeholder="如 1150"></div>
-          <div><label class="input-label">今日客单价（元）</label><input class="data-input" id="inp-today-atv" type="number" placeholder="如 132"></div>
-          <div><label class="input-label">昨日客单价（元）</label><input class="data-input" id="inp-yd-atv" type="number" placeholder="如 125"></div>
-        </div>
-        <div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
-          <div><label class="input-label">今日 K播（万）</label><input class="data-input" id="inp-today-k" type="number" placeholder="0"></div>
-          <div><label class="input-label">今日 店播（万）</label><input class="data-input" id="inp-today-d" type="number" placeholder="0"></div>
-          <div><label class="input-label">今日 商笔（万）</label><input class="data-input" id="inp-today-n" type="number" placeholder="0"></div>
-          <div><label class="input-label">昨日 K播（万）</label><input class="data-input" id="inp-yd-k" type="number" placeholder="0"></div>
-          <div><label class="input-label">昨日 店播（万）</label><input class="data-input" id="inp-yd-d" type="number" placeholder="0"></div>
-          <div><label class="input-label">昨日 商笔（万）</label><input class="data-input" id="inp-yd-n" type="number" placeholder="0"></div>
-        </div>
-      </div>
-
-      <div style="height:1px; background:var(--border);"></div>
-
-      <!-- Section: 近7天汇总 -->
-      <div>
-        <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:12px;">
-          📊 近7天 vs 上个7天（汇总）
-          <span style="font-size:10px; color:var(--text-sub); font-weight:400; display:block; margin-top:2px;">从人货场成交分析，按场域筛选并汇总</span>
-        </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
-          <div><label class="input-label">近7天 K播（万）</label><input class="data-input" id="inp-7d-k" type="number" placeholder="0"></div>
-          <div><label class="input-label">近7天 店播（万）</label><input class="data-input" id="inp-7d-d" type="number" placeholder="0"></div>
-          <div><label class="input-label">近7天 商笔（万）</label><input class="data-input" id="inp-7d-n" type="number" placeholder="0"></div>
-          <div><label class="input-label">上个7天 K播（万）</label><input class="data-input" id="inp-p7d-k" type="number" placeholder="0"></div>
-          <div><label class="input-label">上个7天 店播（万）</label><input class="data-input" id="inp-p7d-d" type="number" placeholder="0"></div>
-          <div><label class="input-label">上个7天 商笔（万）</label><input class="data-input" id="inp-p7d-n" type="number" placeholder="0"></div>
-        </div>
-        <div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-          <div><label class="input-label">近7天动销商家（K播）</label><input class="data-input" id="inp-7d-k-sellers" type="number" placeholder="0"></div>
-          <div><label class="input-label">近7天动销商家（店播）</label><input class="data-input" id="inp-7d-d-sellers" type="number" placeholder="0"></div>
-          <div><label class="input-label">近7天总动销商家</label><input class="data-input" id="inp-7d-active-sellers" type="number" placeholder="0"></div>
-          <div><label class="input-label">近7天 K播单坑产出（万）</label><input class="data-input" id="inp-7d-k-pit" type="number" placeholder="0"></div>
-          <div><label class="input-label">商笔件单价（元）</label><input class="data-input" id="inp-7d-n-price" type="number" placeholder="0"></div>
-        </div>
-      </div>
-
-      <div style="height:1px; background:var(--border);"></div>
-
-      <!-- Section: 突增突降商家 (JSON) -->
-      <div>
-        <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:6px;">⚠️ 突增突降商家数据</div>
-        <div style="font-size:11px; color:var(--text-sub); margin-bottom:10px; line-height:1.6;">
-          格式：JSON 数组，每项包含 name（商家名）、channel（场域：K播/店播/商笔）、cur（近3天均值，万）、prev（前3天均值，万）<br>
-          <code style="font-size:10px; background:#f3f4f6; padding:2px 6px; border-radius:4px;">[{"name":"商家A","channel":"K播","cur":12.5,"prev":8.2},...]</code>
-        </div>
-        <textarea id="inp-anomaly-json" style="width:100%; height:100px; font-size:11px; font-family:monospace; border:1.5px solid var(--border); border-radius:10px; padding:10px; resize:vertical; outline:none; color:var(--text);" placeholder='[{"name":"商家A","channel":"K播","cur":12.5,"prev":8.2}]'></textarea>
-      </div>
-
-      <div style="height:1px; background:var(--border);"></div>
-
-      <!-- Section: 品类突增突降 -->
-      <div>
-        <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:6px;">🗂️ 品类突增突降数据</div>
-        <div style="font-size:11px; color:var(--text-sub); margin-bottom:10px;">
-          格式同上，name = 品类名<br>
-          <code style="font-size:10px; background:#f3f4f6; padding:2px 6px; border-radius:4px;">[{"name":"零食坚果","channel":"K播","cur":80,"prev":55}]</code>
-        </div>
-        <textarea id="inp-cate-json" style="width:100%; height:80px; font-size:11px; font-family:monospace; border:1.5px solid var(--border); border-radius:10px; padding:10px; resize:vertical; outline:none; color:var(--text);" placeholder='[{"name":"零食坚果","channel":"K播","cur":80,"prev":55}]'></textarea>
-      </div>
-
-      <div style="height:1px; background:var(--border);"></div>
-
-      <!-- Section: 商家排行 -->
-      <div>
-        <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:6px;">🏆 商家 DGMV 排行</div>
-        <div style="font-size:11px; color:var(--text-sub); margin-bottom:10px;">
-          格式：每项含 name、dgmv（万）、prev（上期万）、channel（主场域）<br>
-          <code style="font-size:10px; background:#f3f4f6; padding:2px 6px; border-radius:4px;">[{"name":"商家X","dgmv":45.2,"prev":40.1,"channel":"K播"}]</code>
-        </div>
-        <textarea id="inp-seller-json" style="width:100%; height:100px; font-size:11px; font-family:monospace; border:1.5px solid var(--border); border-radius:10px; padding:10px; resize:vertical; outline:none; color:var(--text);" placeholder='[{"name":"商家X","dgmv":45.2,"prev":40.1,"channel":"K播"}]'></textarea>
-      </div>
-
-      <div style="height:1px; background:var(--border);"></div>
-
-      <!-- Section: 爆品排行 -->
-      <div>
-        <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:6px;">📦 爆品 SPU 排行</div>
-        <div style="font-size:11px; color:var(--text-sub); margin-bottom:10px;">
-          格式：每项含 name（商品名）、dgmv（万）、channel（场域）<br>
-          <code style="font-size:10px; background:#f3f4f6; padding:2px 6px; border-radius:4px;">[{"name":"好利来月饼礼盒","dgmv":18.5,"channel":"K播"}]</code>
-        </div>
-        <textarea id="inp-goods-json" style="width:100%; height:80px; font-size:11px; font-family:monospace; border:1.5px solid var(--border); border-radius:10px; padding:10px; resize:vertical; outline:none; color:var(--text);" placeholder='[{"name":"好利来月饼礼盒","dgmv":18.5,"channel":"K播"}]'></textarea>
-      </div>
-
-      <div style="height:1px; background:var(--border);"></div>
-
-      <!-- Section: 价格带 -->
-      <div>
-        <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:6px;">💰 价格带分布</div>
-        <div style="font-size:11px; color:var(--text-sub); margin-bottom:10px;">
-          格式：每项含 label（价格段）、dgmv（万）<br>
-          <code style="font-size:10px; background:#f3f4f6; padding:2px 6px; border-radius:4px;">[{"label":"0-50元","dgmv":120},{"label":"50-200元","dgmv":280}]</code>
-        </div>
-        <textarea id="inp-price-json" style="width:100%; height:60px; font-size:11px; font-family:monospace; border:1.5px solid var(--border); border-radius:10px; padding:10px; resize:vertical; outline:none; color:var(--text);" placeholder='[{"label":"0-50元","dgmv":120}]'></textarea>
-      </div>
-
-      <div style="height:1px; background:var(--border);"></div>
-
-      <!-- Section: 品类×场域 热力 -->
-      <div>
-        <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:6px;">🗺️ 品类×场域热力数据</div>
-        <div style="font-size:11px; color:var(--text-sub); margin-bottom:10px;">
-          格式：每项含 cate（品类）、k、d、n（各场域万元）<br>
-          <code style="font-size:10px; background:#f3f4f6; padding:2px 6px; border-radius:4px;">[{"cate":"零食坚果","k":80,"d":45,"n":30}]</code>
-        </div>
-        <textarea id="inp-heatmap-json" style="width:100%; height:80px; font-size:11px; font-family:monospace; border:1.5px solid var(--border); border-radius:10px; padding:10px; resize:vertical; outline:none; color:var(--text);" placeholder='[{"cate":"零食坚果","k":80,"d":45,"n":30}]'></textarea>
-      </div>
-
-      <!-- Save button -->
-      <button onclick="saveData()" style="background: linear-gradient(135deg,#ff2442,#ff6b6b); color:#fff; border:none; border-radius:14px; padding:16px; font-size:15px; font-weight:800; cursor:pointer; width:100%;">
-        💾 保存并刷新看板
-      </button>
-
-      <div style="text-align:center; font-size:11px; color:var(--text-sub);">数据保存在本地 localStorage，刷新页面不会丢失</div>
-
-    </div>
-  </div>
-</div>
-
 <style>
-  .input-label {
-    display: block;
-    font-size: 11px;
-    color: var(--text-sub);
-    margin-bottom: 5px;
-    font-weight: 600;
-  }
-  .data-input {
-    width: 100%;
-    padding: 9px 11px;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    font-size: 13px;
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.2s;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  .data-input:focus { border-color: #ff2442; }
 </style>
 
 <!-- ─── JAVASCRIPT ─── -->
@@ -1551,16 +1372,6 @@ function switchTab(tab) {
   document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
 }
 
-// ── Modal ──
-function openDataEntry() {
-  loadInputsFromStorage();
-  $('modal-overlay').style.display = 'block';
-  document.body.style.overflow = 'hidden';
-}
-function closeModal() {
-  $('modal-overlay').style.display = 'none';
-  document.body.style.overflow = '';
-}
 
 // ── Storage keys ──
 const KEYS = {
@@ -1573,34 +1384,6 @@ const KEYS = {
   heatmap: 'dm_heatmap_v1',
 };
 
-function saveData() {
-  // numeric inputs
-  const nums = {};
-  [
-    'today-dgmv','yd-dgmv','lw-dgmv','mtd-dgmv',
-    'today-dab','yd-dab','today-atv','yd-atv',
-    'today-k','today-d','today-n','yd-k','yd-d','yd-n',
-    '7d-k','7d-d','7d-n','p7d-k','p7d-d','p7d-n',
-    '7d-k-sellers','7d-d-sellers','7d-active-sellers','7d-k-pit','7d-n-price',
-  ].forEach(k => {
-    const v = parseFloat($('inp-' + k).value);
-    if (!isNaN(v)) nums[k] = v;
-  });
-  localStorage.setItem(KEYS.nums, JSON.stringify(nums));
-
-  // JSON fields
-  const jsonFields = ['anomaly','cate','seller','goods','price','heatmap'];
-  jsonFields.forEach(f => {
-    const raw = $('inp-' + f + '-json').value.trim();
-    if (raw) {
-      try { JSON.parse(raw); localStorage.setItem(KEYS[f === 'seller' ? 'sellers' : f], raw); }
-      catch(e) { alert('⚠️ ' + f + ' JSON格式有误，请检查'); return; }
-    }
-  });
-
-  closeModal();
-  renderAll();
-}
 
 function loadInputsFromStorage() {
   const nums = JSON.parse(localStorage.getItem(KEYS.nums) || '{}');
@@ -2177,10 +1960,10 @@ function seedTodayData() {
   localStorage.setItem('dm_goods_v1', JSON.stringify(vio));
 
   // 近14天趋势（万元）
-  const trendData = [["04/09",39572],["04/10",44384],["04/11",52331],["04/12",49832],["04/13",37169],["04/14",39554],["04/15",40529],["04/16",41195],["04/17",43054],["04/18",56003],["04/19",56656],["04/20",39126],["04/21",40275],["04/22",12720]];
+  const trendData = [["04/09", 144.9], ["04/10", 132.8], ["04/11", 129.4], ["04/12", 132.2], ["04/13", 146.8], ["04/14", 159.8], ["04/15", 143.2], ["04/16", 155.0], ["04/17", 120.9], ["04/18", 164.0], ["04/19", 130.0], ["04/20", 134.4], ["04/21", 146.7], ["04/22", 127.2]];
   localStorage.setItem('dm_trend_v1', JSON.stringify(trendData));
-  // 上周同期趋势（偏移7天）
-  const lwTrendData = [["04/02", 42155], ["04/03", 40851], ["04/04", 47410], ["04/05", 45200], ["04/06", 36835], ["04/07", 35140], ["04/08", 38788], ["04/09", 39572], ["04/10", 44384], ["04/11", 52331], ["04/12", 49832], ["04/13", 37169], ["04/14", 39554], ["04/15", 40529]];
+  // 上周同期趋势（4/02-4/15，对齐本期）
+  const lwTrendData = [["04/02", 192.3], ["04/03", 137.2], ["04/04", 108.6], ["04/05", 103.4], ["04/06", 117.9], ["04/07", 133.1], ["04/08", 152.0], ["04/09", 144.9], ["04/10", 132.8], ["04/11", 129.4], ["04/12", 132.2], ["04/13", 146.8], ["04/14", 159.8], ["04/15", 143.2]];
   localStorage.setItem('dm_lw_trend_v1', JSON.stringify(lwTrendData));
 }
 
