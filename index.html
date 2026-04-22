@@ -1252,40 +1252,13 @@ const DATA = {
   // 本双月累计（万元）
   mtd: 7789.8,
   // 动销商家数（近7天均值）
-  active: 238, kSellers: 12, dSellers: 25,
+  active: 238, kSellers: 12, dSellers: 25, nSellers: 171,
   // K播人均产出（万/商）
   kPit: 11.5,
   // 商家 DGMV Top15（近7天，万元，含环比）
-  sellerTop: [
-    {name:"一群娃的妈妈是潘潘海外专营店", dgmv:55.9, pct:+21.3},
-    {name:"宿咕的铁皮盒旗舰店",          dgmv:46.1, pct:+218.5},
-    {name:"南食召食品旗舰店",            dgmv:44.9, pct:-2.3},
-    {name:"沃尔玛旗舰店",               dgmv:39.3, pct:+78.9},
-    {name:"村驴的店",                   dgmv:37.8, pct:-9.2},
-    {name:"锋味派旗舰店",               dgmv:37.8, pct:+21.5},
-    {name:"遂香记的店",                 dgmv:33.9, pct:+16.3},
-    {name:"温小张的店",                 dgmv:27.8, pct:+195.4},
-    {name:"小黄象旗舰店",               dgmv:26.3, pct:-13.7},
-    {name:"宫门口馒头铺旗舰店",          dgmv:21.9, pct:-13.8},
-    {name:"小禾家零食分装的店",          dgmv:17.7, pct:-37.4},
-    {name:"熊猫猪猪庄园旗舰店",          dgmv:16.9, pct:+362.8},
-    {name:"董饱饱手作工坊的店",          dgmv:16.3, pct:-15.3},
-    {name:"Mamiya旗舰店",              dgmv:16.2, pct:-8.9},
-    {name:"paldo食品旗舰店",           dgmv:15.7, pct:-39.0},
-  ],
+  sellerTop: [{"name": "一群娃的妈妈是潘潘海外专营店", "dgmv": 55.9, "pct": 21.3, "channel": "店播"}, {"name": "宿咕的铁皮盒旗舰店", "dgmv": 46.1, "pct": 218.5, "channel": "K播"}, {"name": "南食召食品旗舰店", "dgmv": 44.9, "pct": -2.3, "channel": "K播"}, {"name": "沃尔玛旗舰店", "dgmv": 39.3, "pct": 78.9, "channel": "商卡"}, {"name": "村驴的店", "dgmv": 37.8, "pct": -9.2, "channel": "商笔"}, {"name": "锋味派旗舰店", "dgmv": 37.8, "pct": 21.5, "channel": "商笔"}, {"name": "遂香记的店", "dgmv": 33.9, "pct": 16.3, "channel": "商笔"}, {"name": "温小张的店", "dgmv": 27.8, "pct": 195.4, "channel": "商笔"}, {"name": "小黄象旗舰店", "dgmv": 26.3, "pct": -13.7, "channel": "店播"}, {"name": "宫门口馒头铺旗舰店", "dgmv": 21.9, "pct": -13.8, "channel": "店播"}, {"name": "小禾家零食分装的店", "dgmv": 17.7, "pct": -37.4, "channel": "店播"}, {"name": "熊猫猪猪庄园旗舰店", "dgmv": 16.9, "pct": 362.8, "channel": "K播"}, {"name": "董饱饱手作工坊的店", "dgmv": 16.3, "pct": -15.3, "channel": "商卡"}, {"name": "Mamiya旗舰店", "dgmv": 16.2, "pct": -8.9, "channel": "商笔"}, {"name": "paldo食品旗舰店", "dgmv": 15.7, "pct": -39.0, "channel": "店播"}],
   // 突增突降商家（近3天 vs 上3天）
-  anomaly: [
-    {name:"沃尔玛旗舰店",               cur:23.3, prev:14.0, dir:"up"},
-    {name:"小黄象旗舰店",               cur:13.0, prev:9.5,  dir:"up"},
-    {name:"温小张的店",                 cur:13.1, prev:11.6, dir:"up"},
-    {name:"锋味派旗舰店",               cur:15.7, prev:15.8, dir:"up"},
-    {name:"宫门口馒头铺旗舰店",          cur:9.2,  prev:8.3,  dir:"up"},
-    {name:"宿咕的铁皮盒旗舰店",          cur:14.2, prev:30.6, dir:"down"},
-    {name:"一群娃的妈妈是潘潘海外专营店", cur:19.0, prev:25.2, dir:"down"},
-    {name:"南食召食品旗舰店",            cur:16.9, prev:22.1, dir:"down"},
-    {name:"遂香记的店",                 cur:12.4, prev:15.6, dir:"down"},
-    {name:"村驴的店",                   cur:15.3, prev:17.1, dir:"down"},
-  ],
+  anomaly: [{"name": "沃尔玛旗舰店", "cur": 23.3, "prev": 14.0, "dir": "up", "channel": "商卡"}, {"name": "小黄象旗舰店", "cur": 13.0, "prev": 9.5, "dir": "up", "channel": "店播"}, {"name": "温小张的店", "cur": 13.1, "prev": 11.6, "dir": "up", "channel": "商笔"}, {"name": "宫门口馒头铺旗舰店", "cur": 9.2, "prev": 8.3, "dir": "up", "channel": "店播"}, {"name": "锋味派旗舰店", "cur": 15.7, "prev": 15.8, "dir": "up", "channel": "商笔"}, {"name": "宿咕的铁皮盒旗舰店", "cur": 14.2, "prev": 30.6, "dir": "down", "channel": "K播"}, {"name": "一群娃的妈妈是潘潘海外专营店", "cur": 19.0, "prev": 25.2, "dir": "down", "channel": "店播"}, {"name": "南食召食品旗舰店", "cur": 16.9, "prev": 22.1, "dir": "down", "channel": "K播"}, {"name": "遂香记的店", "cur": 12.4, "prev": 15.6, "dir": "down", "channel": "商笔"}, {"name": "村驴的店", "cur": 15.3, "prev": 17.1, "dir": "down", "channel": "商笔"}],
   // 品类突增突降
   cate: [
     {name:"饼干/膨化",       cur:117.4, prev:89.7,  dir:"up"},
@@ -1327,6 +1300,10 @@ const DATA = {
     {cate:"乳品/奶粉",     k:0,    d:22.4, n:34.4},
     {cate:"茶饮/饮料",     k:0,    d:0,    n:8.0},
   ],
+  // 爆品 SPU Top15
+  goods: [{"name": "潘潘巧克力特卖会", "dgmv": 46.8, "channel": "店播"}, {"name": "【董生活】达克瓦兹黄油夹心饼干", "dgmv": 24.7, "channel": "K播"}, {"name": "4.0纯牛奶 1L 小绿瓶", "dgmv": 16.2, "channel": "商笔"}, {"name": "村驴家东北粘糊麻辣烫", "dgmv": 15.9, "channel": "商笔"}, {"name": "卤牛腱子（小张热卤）", "dgmv": 14.2, "channel": "商笔"}, {"name": "迷你装4.0纯牛奶250mL×10", "dgmv": 13.7, "channel": "商笔"}, {"name": "【董生活】金华两头乌猪肉爆汁烤肠", "dgmv": 12.8, "channel": "K播"}, {"name": "60元任选5盒带料包", "dgmv": 11.4, "channel": "商笔"}, {"name": "5口味薄荷巧克力探索装", "dgmv": 11.1, "channel": "店播"}, {"name": "【直播专属】韩剧同款泡面", "dgmv": 10.4, "channel": "K播"}, {"name": "【董生活】马兰头纸皮翡翠烧麦", "dgmv": 10.1, "channel": "K播"}, {"name": "【董生活】植物饱藏魔芋素爆肚", "dgmv": 9.8, "channel": "K播"}, {"name": "正宗无盐茯苓薏米山药线面", "dgmv": 8.7, "channel": "商笔"}, {"name": "【胡静专属】云南松茸鸡汤过桥米线", "dgmv": 8.0, "channel": "K播"}, {"name": "村驴家蜂蜜大冷面", "dgmv": 7.7, "channel": "商笔"}],
+  // 价格带分布
+  price: [{"label": "0-20元", "dgmv": 143.1}, {"label": "20-50元", "dgmv": 345.4}, {"label": "50-100元", "dgmv": 313.7}, {"label": "100-200元", "dgmv": 132.6}, {"label": "200-500元", "dgmv": 54.2}, {"label": "500元以上", "dgmv": 1.6}],
   // 近14天趋势（万元，大门个人口径）
   trend: [[" 04/09",144.9],[" 04/10",132.8],[" 04/11",129.4],["04/12",132.2],["04/13",146.8],["04/14",159.8],["04/15",143.2],["04/16",155.0],["04/17",120.9],["04/18",164.0],["04/19",130.0],["04/20",134.4],["04/21",146.7],["04/22",127.2]],
   // 上周同期（4/02-4/15，对应本期14个位置）
@@ -1418,7 +1395,7 @@ function renderAll() {
     $('s-inactive').textContent = inactive;
     if (inactive > 30) { $('s-warn-badge').style.display='inline-flex'; }
   }
-  const nSellers = null;  // 商笔动销商家数暂无
+  const nSellers = DATA.nSellers;
   $('s-k-active').textContent = kSellers ?? '—';
   $('s-d-active').textContent = dSellers ?? '—';
   if (kSellers && active) $('s-k-pct').textContent = fmt(kSellers/active*100,0) + '%';
@@ -1444,7 +1421,7 @@ function renderAll() {
   }
   $('k-sellers').textContent = kSellers ?? '—';
   $('d-sellers').textContent = dSellers ?? '—';
-  if ($('n-sellers')) $('n-sellers').textContent = nSellers != null ? nSellers : '—';
+  if ($('n-sellers')) $('n-sellers').textContent = nSellers ?? '—';
   // K播人均产出 = K播DGMV / K播动销商家数
   const kPit = DATA.kPit;
   $('k-pit').textContent = kPit != null && kPit > 0 ? fmt(kPit, 1) : '—';
@@ -1464,6 +1441,8 @@ function renderAll() {
   renderDTop(DATA.dTop);
 
   // ─ Page 5: Goods ─
+  renderGoodsTable(DATA.goods);
+  renderPriceBands(DATA.price);
   renderCateAnomaly2(DATA.cate);
   renderHeatmap(DATA.heatmap);
 }
@@ -1572,8 +1551,9 @@ function renderSellerTable(data) {
     return `<span class="pill ${cls}">${ch}</span>`;
   };
   tbody.innerHTML = data.slice(0,15).map((d, i) => {
-    const pct = pctChange(d.dgmv, d.prev);
-    const pctTxt = pct != null ? `<span style="color:${pct>0?'var(--red)':'var(--green)'}; font-size:11px;">${pct>0?'▲':'▼'}${Math.abs(pct).toFixed(0)}%</span>` : '—';
+    // d.pct 是直接存的环比值（%），d.prev 是上7天绝对值（二选一）
+    const pctVal = d.pct != null ? d.pct : pctChange(d.dgmv, d.prev);
+    const pctTxt = pctVal != null ? `<span style="color:${pctVal>0?'var(--red)':'var(--green)'}; font-size:11px;">${pctVal>0?'▲':'▼'}${Math.abs(pctVal).toFixed(0)}%</span>` : '—';
     return `
       <tr>
         <td style="color:var(--text-label); font-size:11px;">${i+1}</td>
@@ -1677,11 +1657,8 @@ function renderCateAnomaly2(data) {
 }
 
 // ── Goods table ──
-function renderGoodsTable() {
-  const raw = localStorage.getItem(KEYS.goods);
-  if (!raw) return;
-  let data;
-  try { data = JSON.parse(raw); } catch(e) { return; }
+function renderGoodsTable(data) {
+  if (!data || !data.length) { const t=$('goods-tbody'); if(t) t.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:#94a3b8;">暂无数据</td></tr>'; return; }
   data.sort((a,b) => b.dgmv - a.dgmv);
   const channelPill = ch => {
     const cls = ch==='K播'?'pill-k':ch==='店播'?'pill-d':ch==='商笔'?'pill-n':'pill-c';
@@ -1698,11 +1675,8 @@ function renderGoodsTable() {
 }
 
 // ── Price bands ──
-function renderPriceBands() {
-  const raw = localStorage.getItem(KEYS.price);
-  if (!raw) return;
-  let data;
-  try { data = JSON.parse(raw); } catch(e) { return; }
+function renderPriceBands(data) {
+  if (!data || !data.length) return;
   const maxVal = Math.max(...data.map(d => d.dgmv), 0.01);
   const colors = ['#ff2442','#f59e0b','#3b82f6','#8b5cf6','#00b578','#06b6d4'];
   $('price-band-bars').innerHTML = data.map((d, i) => `
