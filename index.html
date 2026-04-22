@@ -626,34 +626,29 @@
         <div class="stat-value"><span id="t-dgmv-lw">—</span><span class="unit">万</span></div>
       </div>
       <div class="stat-item">
-        <div class="stat-label">月累计 MTD</div>
+        <div class="stat-label">本双月累计 MTD</div>
         <div class="stat-value"><span id="t-dgmv-mtd">—</span><span class="unit">万</span></div>
       </div>
     </div>
-    <div class="last-updated">💡 数据截至当日最后更新时点，手动同步</div>
-  </div>
-
-  <!-- 今日 DAB + 客单价 -->
-  <div class="card">
-    <div class="card-title">
-      <span class="ct-dot" style="background:var(--blue)"></span>
-      今日下单用户 & 客单
-    </div>
-    <div class="stat-row">
-      <div class="stat-item">
-        <div class="stat-label">今日 DAB（下单人数）</div>
-        <div class="stat-value"><span id="t-dab-val">—</span></div>
-        <span class="stat-change" id="t-dab-change">vs 昨日 —</span>
+    <!-- 本双月进度条 -->
+    <div style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span style="font-size:12px; color:var(--text-sub);">本双月目标进度</span>
+        <span style="font-size:12px; font-weight:700;" id="mtd-pct-text">—</span>
       </div>
-      <div class="stat-item">
-        <div class="stat-label">今日客单价</div>
-        <div class="stat-value"><span id="t-atv-val">—</span><span class="unit">元</span></div>
-        <span class="stat-change" id="t-atv-change">vs 昨日 —</span>
+      <div style="height:8px; background:#f3f4f6; border-radius:4px; overflow:hidden;">
+        <div id="mtd-progress-bar" style="height:100%; width:0%; background:linear-gradient(90deg,#ff2442,#ff6b6b); border-radius:4px; transition:width 0.6s;"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-top:4px;">
+        <span style="font-size:10px; color:var(--text-label);">目标：14536.9万</span>
+        <span style="font-size:10px; color:var(--text-label);" id="mtd-remain-text">剩余：—</span>
       </div>
     </div>
+    <div class="last-updated">💡 数据截至当日最后更新时点，实时数据已自动拉取</div>
   </div>
 
-  <!-- 今日分场域 -->
+
+  <!-- 今日分场域<!-- 今日分场域 -->
   <div class="section-title">
     <span class="s-icon">🎯</span>今日分场域表现
   </div>
@@ -1644,23 +1639,16 @@ function renderAll() {
     el.className = 'stat-change ' + (pct>0?'up':'down');
   }
 
-  // DAB
-  const todayDab = G('today-dab'), ydDab = G('yd-dab');
-  $('t-dab-val').textContent = todayDab != null ? Math.round(todayDab).toLocaleString() : '—';
-  setChange($('t-dab-change'), todayDab, ydDab);
-  if (todayDab != null && ydDab != null) {
-    const pct = pctChange(todayDab, ydDab);
-    $('t-dab-change').textContent = (pct>0?'▲':'▼') + ' ' + Math.abs(pct).toFixed(1) + '% vs 昨日';
-  }
-
-  // ATV
-  const todayAtv = G('today-atv'), ydAtv = G('yd-atv');
-  $('t-atv-val').textContent = todayAtv != null ? fmt(todayAtv,0) : '—';
-  if (todayAtv != null && ydAtv != null) {
-    const pct = pctChange(todayAtv, ydAtv);
-    const el = $('t-atv-change');
-    el.textContent = (pct>0?'▲':'▼') + ' ' + Math.abs(pct).toFixed(1) + '% vs 昨日';
-    el.className = 'stat-change ' + (pct>0?'up':'down');
+  // 本双月进度条
+  const MTD_TARGET = 14536.9;
+  if (mtdDgmv != null) {
+    const pct = Math.min(mtdDgmv / MTD_TARGET * 100, 100);
+    const bar = $('mtd-progress-bar');
+    if (bar) { bar.style.width = pct.toFixed(1) + '%'; }
+    const pctTxt = $('mtd-pct-text');
+    if (pctTxt) { pctTxt.textContent = pct.toFixed(1) + '%'; pctTxt.style.color = pct>=100?'var(--green)':'var(--red)'; }
+    const remain = $('mtd-remain-text');
+    if (remain) { remain.textContent = '剩余：' + fmt(Math.max(MTD_TARGET - mtdDgmv, 0), 1) + '万'; }
   }
 
   // Today channel
@@ -1797,9 +1785,9 @@ function renderAnomaly() {
   try { data = JSON.parse(raw); } catch(e) { return; }
 
   data.forEach(d => { d._delta = d.cur - d.prev; d._pct = pctChange(d.cur, d.prev); });
-  const sorted = [...data].sort((a,b) => b._delta - a._delta);
-  const surges = sorted.filter(d => d._delta > 0).slice(0,5);
-  const drops  = sorted.filter(d => d._delta < 0).reverse().slice(0,5);
+  // 支持 dir 字段直接分组（也兼容旧的通过 delta 计算）
+  const surges = data.filter(d => d.dir ? d.dir==='up'  : d._delta > 0).sort((a,b) => b._delta - a._delta).slice(0,15);
+  const drops  = data.filter(d => d.dir ? d.dir==='down': d._delta < 0).sort((a,b) => a._delta - b._delta).slice(0,15);
 
   const renderList = (items, type, container) => {
     if (!items.length) { $( container ).innerHTML = '<div class="empty-hint" style="padding:12px 0;">暂无数据</div>'; return; }
@@ -1810,7 +1798,7 @@ function renderAnomaly() {
           <div class="anomaly-name">${d.name}</div>
           <div class="anomaly-meta">
             <span class="pill pill-${d.channel==='K播'?'k':d.channel==='店播'?'d':'n'}">${d.channel}</span>
-            &nbsp;近3天均值 ${fmt(d.cur)}万 | 前3天 ${fmt(d.prev)}万
+            &nbsp;近7天 ${fmt(d.cur)}万 | 上7天 ${d.prev>0?fmt(d.prev):'<1'}万
           </div>
         </div>
         <div class="anomaly-right">
@@ -1956,49 +1944,106 @@ function renderHeatmap() {
 
 // ── SVG Trend (placeholder with animation) ──
 function drawTrendPlaceholder() {
-  // Draw dummy sine-like sparkline as placeholder
+  // 优先用真实数据，fallback 用占位曲线
+  const trendRaw = localStorage.getItem('dm_trend_v1');
   const svg = $('trend-svg');
   const W = 340, H = 100, pad = 10;
-  const pts = 14;
-  const dummyMain = Array.from({length:pts}, (_,i) => 40 + 35*Math.sin(i*0.7) + 5*Math.sin(i*2.1));
-  const dummyLast = Array.from({length:pts}, (_,i) => 35 + 30*Math.sin(i*0.7+0.5) + 3*Math.sin(i*2));
 
-  const toSVG = (arr) => {
-    const minV = Math.min(...arr), maxV = Math.max(...arr);
-    const range = maxV - minV || 1;
-    return arr.map((v, i) => {
-      const x = pad + i * (W - 2*pad) / (pts-1);
-      const y = H - pad - (v - minV) / range * (H - 2*pad);
-      return [x, y];
+  let labels, vals;
+  if (trendRaw) {
+    const trendData = JSON.parse(trendRaw);
+    labels = trendData.map(d => d[0]);
+    vals   = trendData.map(d => d[1]);
+  } else {
+    const pts = 14;
+    vals   = Array.from({length:pts}, (_,i) => 40 + 35*Math.sin(i*0.7) + 5*Math.sin(i*2.1));
+    labels = Array.from({length:pts}, (_,i) => {
+      const d = new Date(); d.setDate(d.getDate() - (13-i));
+      return `${d.getMonth()+1}/${d.getDate()}`;
     });
-  };
+  }
 
-  const mainPts = toSVG(dummyMain);
-  const lastPts = toSVG(dummyLast);
-  const ptStr = arr => arr.map(p => p.join(',')).join(' ');
+  const minV = Math.min(...vals), maxV = Math.max(...vals);
+  const range = maxV - minV || 1;
+  const nPts = vals.length;
 
-  $('svg-line-tw').setAttribute('points', ptStr(mainPts));
-  $('svg-line-lw').setAttribute('points', ptStr(lastPts));
+  const toXY = (v, i) => ({
+    x: pad + i * (W - 2*pad) / (nPts - 1),
+    y: H - pad - (v - minV) / range * (H - 2*pad)
+  });
 
-  // Area paths
+  const pts2d = vals.map((v,i) => toXY(v, i));
+  const ptStr = arr => arr.map(p => `${p.x},${p.y}`).join(' ');
   const areaPath = (pts) => {
     const first = pts[0], last = pts[pts.length-1];
-    return `M${first[0]},${H} L${ptStr(pts).replace(/,/g,' L').split(' L').join(' L')} L${last[0]},${H} Z`;
+    return `M${first.x},${H} ` + pts.map(p=>`L${p.x},${p.y}`).join(' ') + ` L${last.x},${H} Z`;
   };
-  $('svg-area-tw').setAttribute('d', areaPath(mainPts));
-  $('svg-area-lw').setAttribute('d', areaPath(lastPts));
 
-  // Date labels
+  $('svg-line-tw').setAttribute('points', ptStr(pts2d));
+  $('svg-line-lw').setAttribute('points', '');   // 暂不画上周同期
+  $('svg-area-tw').setAttribute('d', areaPath(pts2d));
+  $('svg-area-lw').setAttribute('d', '');
+
+  // Dot 标注 + Tooltip
+  // 移除旧的 dots
+  svg.querySelectorAll('.trend-dot, .trend-tooltip').forEach(e => e.remove());
+
+  pts2d.forEach((p, i) => {
+    const isToday = i === pts2d.length - 1;
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx', p.x);
+    circle.setAttribute('cy', p.y);
+    circle.setAttribute('r', isToday ? 4 : 3);
+    circle.setAttribute('fill', isToday ? '#ff2442' : 'rgba(255,36,66,0.6)');
+    circle.setAttribute('stroke', '#fff');
+    circle.setAttribute('stroke-width', '1.5');
+    circle.classList.add('trend-dot');
+    circle.style.cursor = 'pointer';
+
+    // Tooltip
+    const tipW = 80, tipH = 32;
+    const tipX = Math.min(p.x - tipW/2, W - tipW - 2);
+    const tipY = p.y < 40 ? p.y + 8 : p.y - tipH - 6;
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.classList.add('trend-tooltip');
+    g.style.opacity = '0';
+    g.style.pointerEvents = 'none';
+    g.style.transition = 'opacity 0.15s';
+
+    const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rect.setAttribute('x', tipX); rect.setAttribute('y', tipY);
+    rect.setAttribute('width', tipW); rect.setAttribute('height', tipH);
+    rect.setAttribute('rx', '6'); rect.setAttribute('fill','rgba(17,24,39,0.88)');
+
+    const t1 = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t1.setAttribute('x', tipX+tipW/2); t1.setAttribute('y', tipY+13);
+    t1.setAttribute('text-anchor','middle'); t1.setAttribute('fill','rgba(255,255,255,0.7)');
+    t1.setAttribute('font-size','9');
+    t1.textContent = labels[i] + (isToday?' 实时':'');
+
+    const t2 = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t2.setAttribute('x', tipX+tipW/2); t2.setAttribute('y', tipY+26);
+    t2.setAttribute('text-anchor','middle'); t2.setAttribute('fill','#fff');
+    t2.setAttribute('font-size','11'); t2.setAttribute('font-weight','700');
+    t2.textContent = vals[i].toLocaleString() + '万';
+
+    g.appendChild(rect); g.appendChild(t1); g.appendChild(t2);
+    svg.appendChild(g);
+
+    // Hover events
+    circle.addEventListener('mouseenter',  () => { g.style.opacity='1'; });
+    circle.addEventListener('mouseleave',  () => { g.style.opacity='0'; });
+    circle.addEventListener('touchstart', (e) => { e.preventDefault(); g.style.opacity='1'; setTimeout(()=>g.style.opacity='0',2000); });
+    svg.appendChild(circle);
+  });
+
+  // Date labels（只显示 3 个）
   const lbl = $('trend-labels');
-  const today = new Date();
-  const labelDays = [-13, -10, -7, -4, -1, 0];
   lbl.innerHTML = '';
-  // just show first, middle, last
-  [0, 6, 13].forEach(i => {
-    const d = new Date(today);
-    d.setDate(d.getDate() - (13 - i));
+  [0, Math.floor((nPts-1)/2), nPts-1].forEach(i => {
     const span = document.createElement('span');
-    span.textContent = `${d.getMonth()+1}/${d.getDate()}`;
+    span.textContent = labels[i];
+    if (i === nPts-1) { span.style.color='var(--red)'; span.style.fontWeight='700'; }
     lbl.appendChild(span);
   });
 }
@@ -2009,12 +2054,8 @@ function seedTodayData() {
   const nums = {
     'today-dgmv': 127.2,
     'yd-dgmv':    146.7,
-    'lw-dgmv':    0,      // 待补充
-    'mtd-dgmv':   0,      // 待补充
-    'today-dab':  0,
-    'yd-dab':     0,
-    'today-atv':  0,
-    'yd-atv':     0,
+    'lw-dgmv':    393.0,   // 上周同期（4/15当日）
+    'mtd-dgmv':   7789.8,  // 本双月累计
     'today-k':    39.4,
     'today-d':    10.7,
     'today-n':    40.4,
@@ -2028,44 +2069,70 @@ function seedTodayData() {
     'p7d-k':      5257.7,
     'p7d-d':      11275.4,
     'p7d-n':      6261.3,
-    '7d-k-sellers':   0,
-    '7d-d-sellers':   0,
-    '7d-active-sellers': 0,
+    '7d-k-sellers':   120,
+    '7d-d-sellers':   85,
+    '7d-active-sellers': 309,
     '7d-k-pit':   0,
     '7d-n-price': 0,
   };
   localStorage.setItem('dm_nums_v1', JSON.stringify(nums));
 
   // 突增突降（近7天 vs 上7天）
+  // 突增 top15 + 突降 top15，格式: {name, channel, cur, prev, dir}
+  // dir: 'up' | 'down'
   const anomaly = [
-    {"name":"宿咕的铁皮盒旗舰店","channel":"K播","cur":44.7,"prev":16.2},
-    {"name":"遂香记的店","channel":"商笔","cur":28.0,"prev":11.7},
-    {"name":"温小张的店","channel":"商笔","cur":24.7,"prev":8.8},
-    {"name":"宫门口馒头铺旗舰店","channel":"店播","cur":18.1,"prev":0.3},
-    {"name":"熊猫猪猪庄园旗舰店","channel":"K播","cur":16.3,"prev":0.6},
-    {"name":"南食召食品旗舰店","channel":"K播","cur":39.0,"prev":56.5},
-    {"name":"Mamiya旗舰店","channel":"K播","cur":12.7,"prev":22.6},
-    {"name":"董饱饱手作工坊的店","channel":"店播","cur":13.8,"prev":18.0}
+    // 突增
+    {"name":"宿咕的铁皮盒旗舰店",    "channel":"K播", "cur":46.1,"prev":16.2,"dir":"up"},
+    {"name":"遂香记的店",            "channel":"商笔","cur":33.9,"prev":11.7,"dir":"up"},
+    {"name":"温小张的店",            "channel":"商笔","cur":27.8,"prev":8.8, "dir":"up"},
+    {"name":"宫门口馒头铺旗舰店",    "channel":"店播","cur":21.9,"prev":0.3, "dir":"up"},
+    {"name":"熊猫猪猪庄园旗舰店",    "channel":"K播", "cur":16.9,"prev":0.6, "dir":"up"},
+    {"name":"paldo食品旗舰店",       "channel":"商笔","cur":15.7,"prev":0.2, "dir":"up"},
+    {"name":"嬛嬛的低卡轻食日记的店","channel":"商笔","cur":15.2,"prev":0.0, "dir":"up"},
+    {"name":"村驴的店",              "channel":"商笔","cur":37.8,"prev":25.2,"dir":"up"},
+    {"name":"琴妈手作馄饨的店",      "channel":"店播","cur":13.9,"prev":2.5, "dir":"up"},
+    {"name":"白象官方旗舰店",        "channel":"K播", "cur":10.4,"prev":0.2, "dir":"up"},
+    {"name":"蒸笼头旗舰店",          "channel":"店播","cur":12.2,"prev":2.0, "dir":"up"},
+    {"name":"满小饱旗舰店",          "channel":"K播", "cur":10.4,"prev":0.3, "dir":"up"},
+    {"name":"小禾家零食分装的店",    "channel":"店播","cur":17.7,"prev":10.4,"dir":"up"},
+    {"name":"馒头超人supermantou的店","channel":"店播","cur":8.0, "prev":1.1, "dir":"up"},
+    {"name":"锋味派旗舰店",          "channel":"商笔","cur":37.8,"prev":34.8,"dir":"up"},
+    // 突降
+    {"name":"南食召食品旗舰店",      "channel":"K播", "cur":44.9,"prev":56.5,"dir":"down"},
+    {"name":"金帝巧克力旗舰店",      "channel":"商笔","cur":7.8, "prev":19.0,"dir":"down"},
+    {"name":"叮叮懒人菜旗舰店",      "channel":"商笔","cur":4.8, "prev":13.0,"dir":"down"},
+    {"name":"极盏旗舰店",            "channel":"商笔","cur":11.0,"prev":18.9,"dir":"down"},
+    {"name":"IMINT旗舰店",           "channel":"商笔","cur":6.5, "prev":13.1,"dir":"down"},
+    {"name":"Mamiya旗舰店",          "channel":"K播", "cur":16.2,"prev":22.7,"dir":"down"},
+    {"name":"食验室旗舰店",          "channel":"商笔","cur":4.6, "prev":10.6,"dir":"down"},
+    {"name":"吃出很多小胖仔仔的店",  "channel":"商笔","cur":6.8, "prev":11.9,"dir":"down"},
+    {"name":"噜咚咚大碗麻辣烫的店",  "channel":"店播","cur":4.9, "prev":9.7, "dir":"down"},
+    {"name":"上英山旗舰店",          "channel":"商笔","cur":7.3, "prev":11.6,"dir":"down"},
+    {"name":"Waitrose海外旗舰店",    "channel":"商笔","cur":5.1, "prev":9.3, "dir":"down"},
+    {"name":"小黄象旗舰店",          "channel":"K播", "cur":26.3,"prev":29.6,"dir":"down"},
+    {"name":"糙能农场旗舰店",        "channel":"商笔","cur":8.6, "prev":10.9,"dir":"down"},
+    {"name":"董饱饱手作工坊的店",    "channel":"店播","cur":16.3,"prev":17.9,"dir":"down"},
+    {"name":"ffit8旗舰店",           "channel":"商笔","cur":7.2, "prev":8.7, "dir":"down"}
   ];
   localStorage.setItem('dm_anomaly_v1', JSON.stringify(anomaly));
 
   // 商家排行
   const sellers = [
-    {"name":"宿咕的铁皮盒旗舰店","dgmv":44.7,"prev":16.2,"channel":"K播"},
-    {"name":"一群娃的妈妈是潘潘海外专营店","dgmv":44.1,"prev":null,"channel":"店播"},
-    {"name":"南食召食品旗舰店","dgmv":39.0,"prev":56.5,"channel":"K播"},
-    {"name":"沃尔玛旗舰店","dgmv":37.5,"prev":null,"channel":"商笔"},
-    {"name":"村驴的店","dgmv":32.4,"prev":25.2,"channel":"商笔"},
-    {"name":"锋味派旗舰店","dgmv":31.5,"prev":34.8,"channel":"商笔"},
-    {"name":"遂香记的店","dgmv":28.0,"prev":11.7,"channel":"商笔"},
-    {"name":"温小张的店","dgmv":24.7,"prev":8.8,"channel":"商笔"},
-    {"name":"小黄象旗舰店","dgmv":22.5,"prev":29.6,"channel":"K播"},
-    {"name":"宫门口馒头铺旗舰店","dgmv":18.1,"prev":0.3,"channel":"店播"},
-    {"name":"熊猫猪猪庄园旗舰店","dgmv":16.3,"prev":0.6,"channel":"K播"},
-    {"name":"小禾家零食分装的店","dgmv":14.8,"prev":10.4,"channel":"店播"},
-    {"name":"董饱饱手作工坊的店","dgmv":13.8,"prev":18.0,"channel":"店播"},
-    {"name":"三兔船长的店","dgmv":13.4,"prev":15.1,"channel":"商笔"},
-    {"name":"Mamiya旗舰店","dgmv":12.7,"prev":22.6,"channel":"K播"}
+    {"name":"一群娃的妈妈是潘潘海外专营店","dgmv":55.9,"prev":null,  "channel":"店播"},
+    {"name":"宿咕的铁皮盒旗舰店",           "dgmv":46.1,"prev":16.2, "channel":"K播"},
+    {"name":"南食召食品旗舰店",             "dgmv":44.9,"prev":56.5, "channel":"K播"},
+    {"name":"沃尔玛旗舰店",                 "dgmv":39.3,"prev":null,  "channel":"商笔"},
+    {"name":"村驴的店",                     "dgmv":37.8,"prev":25.2, "channel":"商笔"},
+    {"name":"锋味派旗舰店",                 "dgmv":37.8,"prev":34.8, "channel":"商笔"},
+    {"name":"遂香记的店",                   "dgmv":33.9,"prev":11.7, "channel":"商笔"},
+    {"name":"温小张的店",                   "dgmv":27.8,"prev":8.8,  "channel":"商笔"},
+    {"name":"小黄象旗舰店",                 "dgmv":26.3,"prev":29.6, "channel":"K播"},
+    {"name":"宫门口馒头铺旗舰店",           "dgmv":21.9,"prev":0.3,  "channel":"店播"},
+    {"name":"小禾家零食分装的店",           "dgmv":17.7,"prev":10.4, "channel":"店播"},
+    {"name":"熊猫猪猪庄园旗舰店",           "dgmv":16.9,"prev":0.6,  "channel":"K播"},
+    {"name":"paldo食品旗舰店",             "dgmv":15.7,"prev":0.2,  "channel":"商笔"},
+    {"name":"嬛嬛的低卡轻食日记的店",       "dgmv":15.2,"prev":0.0,  "channel":"商笔"},
+    {"name":"Mamiya旗舰店",                "dgmv":16.2,"prev":22.7, "channel":"K播"}
   ];
   localStorage.setItem('dm_sellers_v1', JSON.stringify(sellers));
 
@@ -2076,6 +2143,10 @@ function seedTodayData() {
     {"name":"直播违规","dgmv":1,"channel":"涉及1家"}
   ];
   localStorage.setItem('dm_goods_v1', JSON.stringify(vio));
+
+  // 近14天趋势（万元）
+  const trendData = [["04/09",39572],["04/10",44384],["04/11",52331],["04/12",49832],["04/13",37169],["04/14",39554],["04/15",40529],["04/16",41195],["04/17",43054],["04/18",56003],["04/19",56656],["04/20",39126],["04/21",40275],["04/22",12720]];
+  localStorage.setItem('dm_trend_v1', JSON.stringify(trendData));
 }
 
 // 只在没有数据时 seed（不覆盖用户手动录入的）
